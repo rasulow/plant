@@ -1,9 +1,13 @@
 from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
-from db import Base, engine, get_db
+from fastapi.security import HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
-from routers import authentication_router
-from models import Users
+from routers import (
+    authentication_router,
+    class_router,
+    department_router
+)
+from db import Base, engine
+
 
 app = FastAPI(title='Plant API')
 
@@ -21,4 +25,6 @@ app.add_middleware(
 
 Base.metadata.create_all(engine)
 
-app.include_router(authentication_router, tags=["Authentication"])
+app.include_router(authentication_router    , tags=["Authentication"])
+app.include_router(department_router        , tags=['Department']   , dependencies=[Depends(HTTPBearer())])
+app.include_router(class_router             , tags=['Class']        , dependencies=[Depends(HTTPBearer())])

@@ -2,13 +2,54 @@ from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, asc, func
 from tokens import create_access_token, check_token, decode_token
-import models
+import models as mod
 
 
 
 ########################
 # ADMIN AUTHENTICATION #
 ########################
+
+
+async def admin_login(req: mod.LoginSchema, db: Session):
+    result = await read_admin_by_username_password(req.username, req.password, db)
+    if result:
+        return result
+    else:
+        return None
+
+
+# read admin by username and password
+async def read_admin_by_username_password(username: str, password: str, db: Session):
+    result = db.query(mod.Admin)\
+        .filter(and_(
+            mod.Admin.username   == username, 
+            mod.Admin.password   == password, 
+            mod.Admin.is_deleted == False,
+            mod.Admin.is_active  == True
+        )).first()
+    if result:
+        return result
+    else:
+        return None
+
+
+
+# check admin is superadmin
+async def check_admin_is_superadmin(header_param: Request, db: Session):
+    token = await check_token(header_param=header_param)
+    if not token:
+        return None
+    payload = await decode_token(token=token)
+    if not payload:
+        return None
+    username: str = payload.get('username')
+    password: str = payload.get('password')
+    result = await read_admin_by_username_password(username=username, password=password, db=db)
+    if result and result.is_superadmin:
+        return True
+    else:
+        return None
 
 
 
@@ -19,7 +60,7 @@ async def create_superadmin(db: Session):
         'password'  : 'admin'
     }
     access_token = await create_access_token(data=new_dict)
-    new_add = models.Admin(
+    new_add = mod.Admin(
         username        = 'admin',
         password        = 'admin',
         token           = access_token,
@@ -38,13 +79,13 @@ async def create_superadmin(db: Session):
 
 # read all users
 async def read_all_users(header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    result = db.query(models.Users)\
+    result = db.query(mod.Users)\
         .filter(and_(
-            models.Users.is_deleted == False,
-        )).order_by(desc(models.Users.id)).distinct().all()
+            mod.Users.is_deleted == False,
+        )).order_by(desc(mod.Users.id)).distinct().all()
     if result:
         return result
     else:
@@ -53,14 +94,13 @@ async def read_all_users(header_param: Request, db: Session):
 
 # read user
 async def read_user(id, header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    result = db.query(models.Users)\
+    result = db.query(mod.Users)\
         .filter(and_(
-            models.Users.id == id, 
-            models.Users.is_deleted == False,
-            models.Users.is_active  == True
+            mod.Users.id == id, 
+            mod.Users.is_deleted == False,
         )).first()
     if result:
         return result
@@ -70,13 +110,13 @@ async def read_user(id, header_param: Request, db: Session):
 
 # read all admin
 async def read_all_admins(header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    result = db.query(models.Admin)\
+    result = db.query(mod.Admin)\
         .filter(and_(
-            models.Admin.is_deleted == False,
-        )).order_by(desc(models.Admin.id)).distinct().all()
+            mod.Admin.is_deleted == False,
+        )).order_by(desc(mod.Admin.id)).distinct().all()
     if result:
         return result
     else:
@@ -85,56 +125,24 @@ async def read_all_admins(header_param: Request, db: Session):
 
 # read admin
 async def read_admin(id, header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    result = db.query(models.Admin)\
+    result = db.query(mod.Admin)\
         .filter(and_(
-            models.Admin.id == id, 
-            models.Admin.is_deleted == False,
+            mod.Admin.id == id, 
+            mod.Admin.is_deleted == False,
         )).first()
     if result:
         return result
-    else:
-        return None
-
-
-# read admin by username and password
-async def read_admin_by_username_password(username: str, password: str, db: Session):
-    result = db.query(models.Admin)\
-        .filter(and_(
-            models.Admin.username   == username, 
-            models.Admin.password   == password, 
-            models.Admin.is_deleted == False,
-            models.Admin.is_active  == True
-        )).first()
-    if result:
-        return result
-    else:
-        return None
-
-
-# check existing user
-async def read_user_exist(header_param: Request, db: Session):
-    token = await check_token(header_param=header_param)
-    if not token:
-        return None
-    payload = await decode_token(token=token)
-    if not payload:
-        return None
-    username: str = payload.get('username')
-    password: str = payload.get('password')
-    result = await read_admin_by_username_password(username=username, password=password, db=db)
-    if result and result.is_superadmin:
-        return True
     else:
         return None
 
 
 
 # create admin
-async def create_admin(req: models.AdminBase, db: Session, header_param):
-    user = await read_user_exist(header_param=header_param, db=db)
+async def create_admin(req: mod.AdminBase, db: Session, header_param):
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
     new_dict = {
@@ -142,7 +150,7 @@ async def create_admin(req: models.AdminBase, db: Session, header_param):
         'password'  : req.password
     }
     access_token = await create_access_token(data=new_dict)
-    new_add = models.Admin(
+    new_add = mod.Admin(
         username        = req.username,
         password        = req.password,
         token           = access_token,
@@ -160,15 +168,15 @@ async def create_admin(req: models.AdminBase, db: Session, header_param):
 
 
 # update admin
-async def update_admin(id, req: models.AdminBase, header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+async def update_admin(id, req: mod.AdminBase, header_param: Request, db: Session):
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    new_update = db.query(models.Admin).filter(models.Admin.id == id)\
+    new_update = db.query(mod.Admin).filter(mod.Admin.id == id)\
         .update({
-            models.Admin.username   : req.username,
-            models.Admin.password   : req.password,
-            models.Admin.is_active  : req.is_active,
+            mod.Admin.username   : req.username,
+            mod.Admin.password   : req.password,
+            mod.Admin.is_active  : req.is_active,
         }, synchronize_session=False)
     db.commit()
     if new_update:
@@ -178,13 +186,13 @@ async def update_admin(id, req: models.AdminBase, header_param: Request, db: Ses
 
 
 # set is delete true
-async def delete_admin(id, req: models.UserDelete, header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+async def delete_admin(id, req: mod.UserDelete, header_param: Request, db: Session):
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    new_delete = db.query(models.Admin).filter(models.Admin.id == id)\
+    new_delete = db.query(mod.Admin).filter(mod.Admin.id == id)\
         .update({
-            models.Admin.is_deleted     : req.is_deleted
+            mod.Admin.is_deleted     : req.is_deleted
         }, synchronize_session=False)
     db.commit()
     if new_delete:
@@ -194,13 +202,13 @@ async def delete_admin(id, req: models.UserDelete, header_param: Request, db: Se
 
 
 # update admin is active
-async def update_admin_is_active(id, req: models.UserActiveSet, header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+async def update_admin_is_active(id, req: mod.UserActiveSet, header_param: Request, db: Session):
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    new_update = db.query(models.Admin).filter(models.Admin.id == id)\
+    new_update = db.query(mod.Admin).filter(mod.Admin.id == id)\
         .update({
-            models.Admin.is_active     : req.is_active
+            mod.Admin.is_active     : req.is_active
         }, synchronize_session=False)
     db.commit()
     if new_update:
@@ -216,9 +224,35 @@ async def update_admin_is_active(id, req: models.UserActiveSet, header_param: Re
 #######################
 
 
+# read user by username and password
+async def read_user_by_username_password(username: str, password: str, db: Session):
+    result = db.query(mod.Users)\
+        .filter(and_(
+            mod.Users.username == username,
+            mod.Users.password == password,
+            mod.Users.is_deleted == False,
+            mod.Users.is_active == True
+        )).first()
+    if result:
+        return True
+    else:
+        return False
+
+
+
+# user login
+async def user_login(req: mod.LoginSchema, db: Session):
+    result = await read_user_by_username_password(req.username, req.password, db)
+    if result:
+        return result
+    else:
+        return None
+
+
+
 # create user
-async def create_user(req: models.UserBase, header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+async def create_user(req: mod.UserBase, header_param: Request, db: Session):
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
     new_dict = {
@@ -226,7 +260,7 @@ async def create_user(req: models.UserBase, header_param: Request, db: Session):
         'password'  : req.password
     }
     access_token = await create_access_token(data=new_dict)
-    new_add = models.Users(
+    new_add = mod.Users(
         username    = req.username,
         password    = req.password,
         is_active   = req.is_active,
@@ -243,15 +277,15 @@ async def create_user(req: models.UserBase, header_param: Request, db: Session):
 
 
 # update user
-async def update_user(id: int, req: models.UserBase, header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+async def update_user(id: int, req: mod.UserBase, header_param: Request, db: Session):
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    new_update = db.query(models.Users).filter(models.Users.id == id)\
+    new_update = db.query(mod.Users).filter(mod.Users.id == id)\
         .update({
-            models.Users.username   : req.username,
-            models.Users.password   : req.password,
-            models.Users.is_active  : req.is_active
+            mod.Users.username   : req.username,
+            mod.Users.password   : req.password,
+            mod.Users.is_active  : req.is_active
         }, synchronize_session=False)
     db.commit()
     if new_update:
@@ -262,13 +296,13 @@ async def update_user(id: int, req: models.UserBase, header_param: Request, db: 
 
 
 # delete user
-async def delete_user(id: int, req: models.UserDelete, header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+async def delete_user(id: int, req: mod.UserDelete, header_param: Request, db: Session):
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    new_delete = db.query(models.Users).filter(models.Users.id == id)\
+    new_delete = db.query(mod.Users).filter(mod.Users.id == id)\
         .update({
-            models.Users.is_deleted  : req.is_deleted
+            mod.Users.is_deleted  : req.is_deleted
         }, synchronize_session=False)
     db.commit()
     if new_delete:
@@ -279,16 +313,71 @@ async def delete_user(id: int, req: models.UserDelete, header_param: Request, db
 
 
 # update user is active
-async def update_user_is_active(id: int, req: models.UserActiveSet, header_param: Request, db: Session):
-    user = await read_user_exist(header_param=header_param, db=db)
+async def update_user_is_active(id: int, req: mod.UserActiveSet, header_param: Request, db: Session):
+    user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return None
-    new_update = db.query(models.Users).filter(models.Users.id == id)\
+    new_update = db.query(mod.Users).filter(mod.Users.id == id)\
     .update({
-        models.Users.is_active  : req.is_active
+        mod.Users.is_active  : req.is_active
     }, synchronize_session=False)
     db.commit()
     if new_update:
         return True
+    else:
+        return None
+
+
+
+
+async def check_admin_token(header_param: Request, db: Session):
+    token = await check_token(header_param=header_param)
+    if not token:
+        return None
+    payload = await decode_token(token=token)
+    if not payload:
+        return None
+    username: str = payload.get('username')
+    password: str = payload.get('password')
+    result = await read_admin_by_username_password(username=username, password=password, db=db)
+    if result:
+        return True
+    else:
+        return None
+
+
+async def check_user_token(header_param: Request, db: Session):
+    token = await check_token(header_param=header_param)
+    if not token:
+        return None
+    payload = await decode_token(token=token)
+    if not payload:
+        return None
+    username: str = payload.get('username')
+    password: str = payload.get('password')
+    result = await read_user_by_username_password(username=username, password=password, db=db)
+    if result:
+        return True
+    else:
+        return None
+
+
+
+##############
+# DEPARTMENT #
+##############
+
+
+
+async def create_department(header_param: Request, req: mod.DepartmentSchema, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    new_add = mod.Department(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
     else:
         return None

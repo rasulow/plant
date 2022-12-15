@@ -31,3 +31,26 @@ class Admin(Base):
 
 
 # plant
+class Department(Base):
+    __tablename__   = 'department'
+    id              = Column(Integer, primary_key=True, index=True)
+    name_lt         = Column(String)
+    name_ru         = Column(String)
+    is_deleted      = Column(Boolean, default=False)
+    create_at       = Column(DateTime, default=datetime.now)
+    update_at       = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    class_rel       = relationship('Class', back_populates='department')
+
+
+class Class(Base):
+    __tablename__   = 'class'
+    id              = Column(Integer, primary_key=True, index=True)
+    name_lt         = Column(String)
+    name_ru         = Column(String)
+    deaprtment_id   = Column(Integer, ForeignKey('department.id'))
+    is_deleted      = Column(Boolean, default=False)
+    create_at       = Column(DateTime, default=datetime.now)
+    update_at       = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    department      = relationship('Department', back_populates='class_rel')
