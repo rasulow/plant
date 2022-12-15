@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from typing import List
 
 class AdminBase(BaseModel):
-    user_type       : str = 'user'
     username        : str
     password        : str
     is_active       : bool = False
@@ -12,16 +11,23 @@ class AdminBase(BaseModel):
         orm_mode = True
 
 
-class AdminDelete(BaseModel):
-    user_type       : str = 'user'
+class UserBase(BaseModel):
+    username        : str
+    password        : str
+    is_active       : bool = False
+
+    class Config:
+        orm_mode = True
+
+
+class UserDelete(BaseModel):
     is_deleted      : bool = True
 
     class Config:
         orm_mode = True
 
 
-class AdminActiveSet(BaseModel):
-    user_type       : str = 'user'
+class UserActiveSet(BaseModel):
     is_active       : bool = True
 
     class Config:

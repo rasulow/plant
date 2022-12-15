@@ -10,6 +10,22 @@ from returns import Returns
 authentication_router = APIRouter()
 
 
+
+########################
+# ADMIN AUTHENTICATION #
+########################
+
+
+@authentication_router.post('/api/create-superadmin')
+async def create_superadmin(db: Session = Depends(get_db)):
+    result = await crud.create_superadmin(db=db)
+    if result:
+        return Returns.object(result)
+    else:
+        return Returns.NOT_INSERTED
+
+
+
 @authentication_router.get('/api/get-users', dependencies=[Depends(HTTPBearer())])
 async def get_users(header_param: Request, db: Session = Depends(get_db)):
     result = await crud.read_all_users(header_param = header_param, db=db)
@@ -65,7 +81,7 @@ async def update_admin(id: int, header_param: Request, req: models.AdminBase, db
 
 
 @authentication_router.put('/api/delete-admin/{id}', dependencies=[Depends(HTTPBearer())])
-async def delete_admin(id: int, header_param: Request, req: models.AdminDelete, db: Session = Depends(get_db)):
+async def delete_admin(id: int, header_param: Request, req: models.UserDelete, db: Session = Depends(get_db)):
     result = await crud.delete_admin(id=id, header_param=header_param, req=req, db=db)
     if result:
         return Returns.DELETED
@@ -73,9 +89,57 @@ async def delete_admin(id: int, header_param: Request, req: models.AdminDelete, 
         return Returns.NOT_DELETED
 
 
-@authentication_router.put('/api/update-is-active/{id}', dependencies=[Depends(HTTPBearer())])
-async def update_is_active(id: int, header_param: Request, req: models.AdminActiveSet, db: Session = Depends(get_db)):
-    result = await crud.update_is_active(id=id, header_param=header_param, req=req, db=db)
+@authentication_router.put('/api/update-admin-is-active/{id}', dependencies=[Depends(HTTPBearer())])
+async def update_is_active(id: int, header_param: Request, req: models.UserActiveSet, db: Session = Depends(get_db)):
+    result = await crud.update_admin_is_active(id=id, header_param=header_param, req=req, db=db)
+    if result:
+        return Returns.UPDATED
+    else:
+        return Returns.NOT_UPDATED
+
+
+
+
+
+#######################
+# USER AUTHENTICATION #
+#######################
+
+
+
+
+@authentication_router.post('/api/create-user', dependencies=[Depends(HTTPBearer())])
+async def create_user(header_param: Request, req: models.UserBase, db: Session = Depends(get_db)):
+    result = await crud.create_user(header_param=header_param, req=req, db=db)
+    if result:
+        return Returns.object(result)
+    else:
+        return Returns.NOT_INSERTED
+
+
+
+@authentication_router.put('/api/update-user/{id}', dependencies=[Depends(HTTPBearer())])
+async def update_user(id: int, header_param: Request, req: models.UserBase, db: Session = Depends(get_db)):
+    result = await crud.update_user(id=id, header_param=header_param, req=req, db=db)
+    if result:
+        return Returns.UPDATED
+    else:
+        return Returns.NOT_UPDATED
+
+
+
+@authentication_router.put('api/delete-user/{id}', dependencies=[Depends(HTTPBearer())])
+async def delete_user(id: int, header_param: Request, req: models.UserDelete, db: Session = Depends(get_db)):
+    result = await crud.delete_user(id=id, header_param=header_param, req=req, db=db)
+    if result:
+        return Returns.DELETED
+    else:
+        return Returns.NOT_DELETED
+
+
+@authentication_router.put('api/update-user-is-active/{id}', dependencies=[Depends(HTTPBearer())])
+async def update_user_is_active(id: int, header_param: Request, req: models.UserActiveSet, db: Session = Depends(get_db)):
+    result = await crud.update_user_is_active(id=id, header_param=header_param, req=req, db=db)
     if result:
         return Returns.UPDATED
     else:

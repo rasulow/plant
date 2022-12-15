@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from db import Base
 
 
+# authentication model
 class Users(Base):
     __tablename__   = 'users'
     id              = Column(Integer, primary_key=True, index=True)
@@ -27,3 +28,6 @@ class Admin(Base):
     is_deleted      = Column(Boolean, default=False)
     create_at       = Column(DateTime, default=datetime.now)
     update_at       = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+# plant
