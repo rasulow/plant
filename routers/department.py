@@ -18,9 +18,19 @@ async def create_department(header_param: Request, req: mod.DepartmentSchema, db
         return Returns.NOT_INSERTED
 
 
+
+@department_router.put('/api/update-department/{id}')
+async def update_department(id: int, header_param: Request, req: mod.DepartmentSchema, db: Session = Depends(get_db)):
+    result = await crud.update_department(id, header_param, req, db)
+    if result:
+        return Returns.UPDATED
+    else:
+        return Returns.NOT_UPDATED
+
+
 @department_router.get('/api/get-admin-departments')
 async def get_admin_departments(header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_admin_deaprtments(header_param, db)
+    result = await crud.read_admin_departments(header_param, db)
     if result:
         return Returns.object(result)
     else:

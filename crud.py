@@ -1,5 +1,6 @@
 from fastapi import Request
 from sqlalchemy.orm import Session, joinedload
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, or_, desc, asc, func
 from tokens import create_access_token, check_token, decode_token
 import models as mod
@@ -385,13 +386,31 @@ async def create_department(header_param: Request, req: mod.DepartmentSchema, db
 
 
 
-async def read_admin_deaprtments(header_param, db: Session):
+async def update_department(id, header_param, req: mod.DepartmentSchema, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Department).filter(mod.Department.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return True
+    else:
+        return None
+
+
+
+
+async def read_admin_departments(header_param, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
         return None
     result = db.query(mod.Department)\
-        .options(joinedload(mod.Department.class_rel))\
-        .filter(mod.Department.is_deleted == False).all()
+        .options(joinedload(mod.Department.class_rel)\
+            .options(joinedload(mod.Class.subclass)\
+                .options(joinedload(mod.Subclass.supersubclass)))
+        ).filter(mod.Department.is_deleted == False).order_by(desc(mod.Department.id)).all()
     if result:
         return result
     else:
@@ -424,13 +443,132 @@ async def create_class(req: mod.ClassSchema, header_param, db: Session):
 
 
 
+async def update_class(id, header_param, req: mod.ClassSchema, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Class).filter(mod.Class.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return True
+    else:
+        return None    
+
+
 
 async def read_admin_classes(header_param: Request, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
         return None
     result = db.query(mod.Class)\
-        .filter(mod.Class.is_deleted == False).all()
+        .options(joinedload(mod.Class.subclass)\
+            .options(joinedload(mod.Subclass.supersubclass))
+        ).filter(mod.Class.is_deleted == False).order_by(desc(mod.Class.id)).all()
+    if result:
+        return result
+    else:
+        return None
+
+
+
+
+
+############
+# SUBCLASS #
+############
+
+
+
+async def create_subclass(header_param, req: mod.SubclassSchema, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    new_add = mod.Subclass(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    else:
+        return None
+
+
+
+async def update_subclass(id, header_param, req: mod.SubclassSchema, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Subclass).filter(mod.Subclass.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return True
+    else:
+        return None
+
+
+
+async def read_admin_subclass(header_param, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    result = db.query(mod.Subclass)\
+        .options(joinedload(mod.Subclass.supersubclass))\
+            .filter(mod.Subclass.is_deleted == False).order_by(desc(mod.Subclass.id)).all()
+    if result:
+        return result
+    else:
+        return None
+
+
+
+
+
+#################
+# SUPERSUBCLASS #
+#################
+
+
+
+async def create_supersubclass(header_param: Request, req: mod.SupersubclassSchema, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    new_add = mod.Supersubclass(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    else:
+        return None
+
+
+
+async def update_supersubclass(id, header_param: Request, req: mod.SupersubclassSchema, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Supersubclass).filter(mod.Supersubclass.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return True
+    else:
+        return None
+
+
+
+async def read_admin_supersubclass(header_param: Request, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    result = db.query(mod.Supersubclass)\
+        .filter(mod.Supersubclass.is_deleted == False).order_by(desc(mod.Supersubclass.id)).all()
     if result:
         return result
     else:

@@ -49,18 +49,37 @@ class DeleteSchema(BaseModel):
         orm_mode = True
 
 
-class DepartmentSchema(BaseModel):
+class CategoriesBase(BaseModel):
     name_lt         : str
     name_ru         : str
+
+
+class DepartmentSchema(CategoriesBase):
+    pass
 
     class Config:
         orm_mode = True
 
 
-class ClassSchema(BaseModel):
-    name_lt         : str
-    name_ru         : str
+class ClassSchema(CategoriesBase):
     department_id   : int
+    
+    class Config:
+        orm_mode = True
+        
+
+class SubclassSchema(CategoriesBase):
+    department_id   : int
+    class_id        : int
+    
+    class Config:
+        orm_mode = True
+
+
+class SupersubclassSchema(CategoriesBase):
+    department_id   : int
+    class_id        : int
+    subclass_id     : int
     
     class Config:
         orm_mode = True
