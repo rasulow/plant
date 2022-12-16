@@ -18,3 +18,10 @@ async def create_department(header_param: Request, req: mod.DepartmentSchema, db
         return Returns.NOT_INSERTED
 
 
+@department_router.get('/api/get-admin-departments')
+async def get_admin_departments(header_param: Request, db: Session = Depends(get_db)):
+    result = await crud.read_admin_deaprtments(header_param, db)
+    if result:
+        return Returns.object(result)
+    else:
+        return Returns.NULL

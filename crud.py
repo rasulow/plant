@@ -1,5 +1,5 @@
 from fastapi import Request
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, desc, asc, func
 from tokens import create_access_token, check_token, decode_token
 import models as mod
@@ -379,5 +379,59 @@ async def create_department(header_param: Request, req: mod.DepartmentSchema, db
         db.commit()
         db.refresh(new_add)
         return new_add
+    else:
+        return None
+
+
+
+
+async def read_admin_deaprtments(header_param, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    result = db.query(mod.Department)\
+        .options(joinedload(mod.Department.class_rel))\
+        .filter(mod.Department.is_deleted == False).all()
+    if result:
+        return result
+    else:
+        return None
+
+
+
+
+#########
+# CLASS #
+#########
+
+
+async def create_class(req: mod.ClassSchema, header_param, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    new_add = mod.Class(
+        name_lt     = req.name_lt,
+        name_ru     = req.name_ru,
+        department_id   = req.department_id
+    )
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    else:
+        return None
+
+
+
+
+async def read_admin_classes(header_param: Request, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    result = db.query(mod.Class)\
+        .filter(mod.Class.is_deleted == False).all()
+    if result:
+        return result
     else:
         return None

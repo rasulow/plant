@@ -42,11 +42,9 @@ class UserActiveSet(BaseModel):
         orm_mode = True
 
 
-class ClassSchema(BaseModel):
-    name_lt         : str
-    name_ru         : str
-    department_id   : int
-    
+class DeleteSchema(BaseModel):
+    is_deleted      : bool
+
     class Config:
         orm_mode = True
 
@@ -54,7 +52,15 @@ class ClassSchema(BaseModel):
 class DepartmentSchema(BaseModel):
     name_lt         : str
     name_ru         : str
-    class_rel       : List[ClassSchema] = []
 
+    class Config:
+        orm_mode = True
+
+
+class ClassSchema(BaseModel):
+    name_lt         : str
+    name_ru         : str
+    department_id   : int
+    
     class Config:
         orm_mode = True

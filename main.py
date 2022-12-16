@@ -15,6 +15,7 @@ origins = ["*"]
 methods = ["*"]
 headers = ["*"]
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

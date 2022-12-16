@@ -48,7 +48,7 @@ class Class(Base):
     id              = Column(Integer, primary_key=True, index=True)
     name_lt         = Column(String)
     name_ru         = Column(String)
-    deaprtment_id   = Column(Integer, ForeignKey('department.id'))
+    department_id   = Column(Integer, ForeignKey('department.id'))
     is_deleted      = Column(Boolean, default=False)
     create_at       = Column(DateTime, default=datetime.now)
     update_at       = Column(DateTime, default=datetime.now, onupdate=datetime.now)
