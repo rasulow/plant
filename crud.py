@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, Response
 from sqlalchemy.orm import Session, joinedload
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, or_, desc, asc, func
@@ -22,7 +22,12 @@ async def admin_login(req: mod.LoginSchema, db: Session):
 
 # read admin by username and password
 async def read_admin_by_username_password(username: str, password: str, db: Session):
-    result = db.query(mod.Admin)\
+    result = db.query(
+        mod.Admin.id,
+        mod.Admin.username,
+        mod.Admin.token,
+        mod.Admin.is_superadmin
+    )\
         .filter(and_(
             mod.Admin.username   == username, 
             mod.Admin.password   == password, 
@@ -82,11 +87,18 @@ async def create_superadmin(db: Session):
 async def read_all_users(header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
-    result = db.query(mod.Users)\
+        return 1
+    result = db.query(
+        mod.Users.id,
+        mod.Users.username,
+        mod.Users.password,
+        mod.Users.is_active,
+        mod.Users.create_at,
+        mod.Users.update_at
+    )\
         .filter(and_(
             mod.Users.is_deleted == False,
-        )).order_by(desc(mod.Users.id)).distinct().all()
+        )).order_by(asc(mod.Users.id)).distinct().all()
     if result:
         return result
     else:
@@ -227,7 +239,11 @@ async def update_admin_is_active(id, req: mod.UserActiveSet, header_param: Reque
 
 # read user by username and password
 async def read_user_by_username_password(username: str, password: str, db: Session):
-    result = db.query(mod.Users)\
+    result = db.query(
+        mod.Users.id,
+        mod.Users.username,
+        mod.Users.token
+    )\
         .filter(and_(
             mod.Users.username == username,
             mod.Users.password == password,
@@ -409,8 +425,11 @@ async def read_admin_departments(header_param, db: Session):
     result = db.query(mod.Department)\
         .options(joinedload(mod.Department.class_rel)\
             .options(joinedload(mod.Class.subclass)\
-                .options(joinedload(mod.Subclass.supersubclass)))
-        ).filter(mod.Department.is_deleted == False).order_by(desc(mod.Department.id)).all()
+                .options(joinedload(mod.Subclass.supersubclass)\
+                    .options(joinedload(mod.Supersubclass.order)\
+                        .options(joinedload(mod.Order.suborder))))))\
+                            .filter(mod.Department.is_deleted == False)\
+                                .order_by(desc(mod.Department.id)).all()
     if result:
         return result
     else:
@@ -464,8 +483,11 @@ async def read_admin_classes(header_param: Request, db: Session):
         return None
     result = db.query(mod.Class)\
         .options(joinedload(mod.Class.subclass)\
-            .options(joinedload(mod.Subclass.supersubclass))
-        ).filter(mod.Class.is_deleted == False).order_by(desc(mod.Class.id)).all()
+            .options(joinedload(mod.Subclass.supersubclass)\
+                .options(joinedload(mod.Supersubclass.order)\
+                    .optioins(joinedload(mod.Order.suborder)))))\
+                        .filter(mod.Class.is_deleted == False)\
+                            .order_by(desc(mod.Class.id)).all()
     if result:
         return result
     else:
@@ -516,8 +538,11 @@ async def read_admin_subclass(header_param, db: Session):
     if not user:
         return None
     result = db.query(mod.Subclass)\
-        .options(joinedload(mod.Subclass.supersubclass))\
-            .filter(mod.Subclass.is_deleted == False).order_by(desc(mod.Subclass.id)).all()
+        .options(joinedload(mod.Subclass.supersubclass)\
+            .options(joinedload(mod.Supersubclass.order)\
+                .options(joinedload(mod.Order.suborder))))\
+                    .filter(mod.Subclass.is_deleted == False)\
+                        .order_by(desc(mod.Subclass.id)).all()
     if result:
         return result
     else:
@@ -568,7 +593,108 @@ async def read_admin_supersubclass(header_param: Request, db: Session):
     if not user:
         return None
     result = db.query(mod.Supersubclass)\
-        .filter(mod.Supersubclass.is_deleted == False).order_by(desc(mod.Supersubclass.id)).all()
+        .options(joinedload(mod.Supersubclass.order)\
+            .options(joinedload(mod.Order.suborder)))\
+                .filter(mod.Supersubclass.is_deleted == False)\
+                    .order_by(desc(mod.Supersubclass.id)).all()
+    if result:
+        return result
+    else:
+        return None
+
+
+
+#########
+# ORDER #
+#########
+
+
+async def create_order(header_param: Request, req: mod.OrderSchema, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    new_add = mod.Order(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    else:
+        return None
+
+
+
+async def update_order(id: int, header_param: Request, req: mod.OrderSchema, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Order).filter(mod.Order.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return True
+    else:
+        return None
+
+
+
+async def read_admin_order(header_param: Request, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    result = db.query(mod.Order)\
+        .options(joinedload(mod.Order.suborder))\
+            .filter(mod.Order.is_deleted == False)\
+                .order_by(desc(mod.Order.id)).all()
+    if result:
+        return result
+    else:
+        return None
+
+
+
+
+############
+# SUBORDER #
+############
+
+
+async def create_suborder(header_param, req, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    new_add = mod.Suborder(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    else:
+        return None
+    
+    
+
+async def update_suborder(id, header_param, req, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Suborder).filter(mod.Suborder.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return True
+    else:
+        return None
+    
+    
+async def read_admin_suborder(header_param, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return None
+    result = db.query(mod.Suborder).filter(mod.Suborder.is_deleted == False)\
+        .order_by(desc(mod.Suborder.id)).all()
     if result:
         return result
     else:

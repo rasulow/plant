@@ -9,6 +9,7 @@ class Returns:
     TOKEN_NOT_FOUND                = {"error" : True,  "body" : "TOKEN_NOT_FOUND"}
     TOKEN_NOT_DECODED              = {"error" : True,  "body" : "TOKEN_NOT_DECODED"}
     USER_NOT_FOUND                 = {"error" : True,  "body" : "USER_NOT_FOUND"}
+    USER_OR_PASSWORD_WRONG         = {"error" : True,  "body" : "USER_OR_PASSWORD_WRONG"}
     LIMIT                          = {"error" : True,  "body" : "LIMIT"}
     WRONG_CODE                     = {"error" : True,  "body" : "WRONG_CODE"}
     TIMEOUT                        = {"error" : True,  "body" : "TIMEOUT"}

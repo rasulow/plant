@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, status, Response
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from db import get_db
@@ -22,7 +22,7 @@ async def login_admin(req: mod.LoginSchema, db: Session = Depends(get_db)):
     if result:
         return Returns.object(result)
     else:
-        return Returns.NULL
+        return Returns.USER_OR_PASSWORD_WRONG
 
 
 @authentication_router.post('/api/login-user')
@@ -47,10 +47,12 @@ async def create_superadmin(db: Session = Depends(get_db)):
 @authentication_router.get('/api/get-users', dependencies=[Depends(HTTPBearer())])
 async def get_users(header_param: Request, db: Session = Depends(get_db)):
     result = await crud.read_all_users(header_param = header_param, db=db)
+    if result == 1:
+        return Response(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return Returns.object(result)
+        return result
     else:
-        return Returns.NULL
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @authentication_router.get('/api/get-user/{id}', dependencies=[Depends(HTTPBearer())])

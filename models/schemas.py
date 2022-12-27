@@ -83,3 +83,25 @@ class SupersubclassSchema(CategoriesBase):
     
     class Config:
         orm_mode = True
+
+
+
+class OrderSchema(CategoriesBase):
+    department_id       : int
+    class_id            : int
+    subclass_id         : int
+    supersubclass_id    : int
+    
+    class Config:
+        orm_mode = True
+
+
+class SuborderSchema(CategoriesBase):
+    department_id       : int
+    class_id            : int
+    subclass_id         : int
+    supersubclass_id    : int
+    order_id            : int
+    
+    class Config:
+        orm_mode = True
