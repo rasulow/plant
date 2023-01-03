@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, status, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from db import get_db
 from returns import Returns
@@ -11,25 +13,34 @@ order_router = APIRouter()
 @order_router.post('/api/create-order')
 async def create_order(header_param: Request, req: mod.OrderSchema, db: Session = Depends(get_db)):
     result = await crud.create_order(header_param, req, db)
+    result = jsonable_encoder(result)
+    if result == -1:
+        return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return Returns.object(result)
+        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
-        return Returns.NOT_INSERTED
+        return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @order_router.put('/api/update-order/{id}')
 async def update_order(id: int, header_param: Request, req: mod.OrderSchema, db: Session = Depends(get_db)):
     result = await crud.update_order(id, header_param, req, db)
+    result = jsonable_encoder(result)
+    if result == -1:
+        return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return Returns.UPDATED
+        return JSONResponse(status_code=status.HTTP_201_CREATED)
     else:
-        return Returns.NOT_UPDATED
+        return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @order_router.get('/api/get-admin-order')
 async def create_order(header_param: Request, db: Session = Depends(get_db)):
     result = await crud.read_admin_order(header_param, db)
+    result = jsonable_encoder(result)
+    if result == -1:
+        return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return Returns.object(result)
+        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
-        return Returns.NULL
+        return HTTPException(status_code=status.HTTP_204_NO_CONTENT)

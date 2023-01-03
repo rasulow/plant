@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, status, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from db import get_db
 import crud
@@ -11,26 +13,35 @@ supersubclass_router = APIRouter()
 @supersubclass_router.post('/api/create-supersubclass')
 async def create_supersubclass(header_param: Request, req: mod.SupersubclassSchema, db: Session = Depends(get_db)):
     result = await crud.create_supersubclass(header_param, req, db)
+    result = jsonable_encoder(result)
+    if result == -1:
+        return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return Returns.object(result)
+        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
-        return Returns.NOT_INSERTED
+        return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @supersubclass_router.put('/api/update-supersubclass/{id}')
 async def update_supersubclass(id: int, header_param: Request, req: mod.SupersubclassSchema, db: Session = Depends(get_db)):
     result = await crud.update_supersubclass(id, header_param, req, db)
+    result = jsonable_encoder(result)
+    if result == -1:
+        return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return Returns.UPDATED
+        return JSONResponse(status_code=status.HTTP_201_CREATED)
     else:
-        return Returns.NOT_UPDATED
+        return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
 
 @supersubclass_router.get('/api/get-admin-supersubclass')
 async def get_admin_supersubclass(header_param: Request, db: Session = Depends(get_db)):
     result = await crud.read_admin_supersubclass(header_param, db)
+    result = jsonable_encoder(result)
+    if result == -1:
+        return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return Returns.object(result)
+        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
-        return Returns.NULL
+        return HTTPException(status_code=status.HTTP_204_NO_CONTENT)

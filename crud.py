@@ -87,7 +87,7 @@ async def create_superadmin(db: Session):
 async def read_all_users(header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return 1
+        return -1
     result = db.query(
         mod.Users.id,
         mod.Users.username,
@@ -109,7 +109,7 @@ async def read_all_users(header_param: Request, db: Session):
 async def read_user(id, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     result = db.query(mod.Users)\
         .filter(and_(
             mod.Users.id == id, 
@@ -125,7 +125,7 @@ async def read_user(id, header_param: Request, db: Session):
 async def read_all_admins(header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     result = db.query(mod.Admin)\
         .filter(and_(
             mod.Admin.is_deleted == False,
@@ -140,7 +140,7 @@ async def read_all_admins(header_param: Request, db: Session):
 async def read_admin(id, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     result = db.query(mod.Admin)\
         .filter(and_(
             mod.Admin.id == id, 
@@ -157,7 +157,7 @@ async def read_admin(id, header_param: Request, db: Session):
 async def create_admin(req: mod.AdminBase, db: Session, header_param):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_dict = {
         'username'  : req.username,
         'password'  : req.password
@@ -184,7 +184,7 @@ async def create_admin(req: mod.AdminBase, db: Session, header_param):
 async def update_admin(id, req: mod.AdminBase, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_update = db.query(mod.Admin).filter(mod.Admin.id == id)\
         .update({
             mod.Admin.username   : req.username,
@@ -202,7 +202,7 @@ async def update_admin(id, req: mod.AdminBase, header_param: Request, db: Sessio
 async def delete_admin(id, req: mod.UserDelete, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_delete = db.query(mod.Admin).filter(mod.Admin.id == id)\
         .update({
             mod.Admin.is_deleted     : req.is_deleted
@@ -218,7 +218,7 @@ async def delete_admin(id, req: mod.UserDelete, header_param: Request, db: Sessi
 async def update_admin_is_active(id, req: mod.UserActiveSet, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_update = db.query(mod.Admin).filter(mod.Admin.id == id)\
         .update({
             mod.Admin.is_active     : req.is_active
@@ -271,7 +271,7 @@ async def user_login(req: mod.LoginSchema, db: Session):
 async def create_user(req: mod.UserBase, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_dict = {
         'username'  : req.username,
         'password'  : req.password
@@ -297,7 +297,7 @@ async def create_user(req: mod.UserBase, header_param: Request, db: Session):
 async def update_user(id: int, req: mod.UserBase, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_update = db.query(mod.Users).filter(mod.Users.id == id)\
         .update({
             mod.Users.username   : req.username,
@@ -316,7 +316,7 @@ async def update_user(id: int, req: mod.UserBase, header_param: Request, db: Ses
 async def delete_user(id: int, req: mod.UserDelete, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_delete = db.query(mod.Users).filter(mod.Users.id == id)\
         .update({
             mod.Users.is_deleted  : req.is_deleted
@@ -333,7 +333,7 @@ async def delete_user(id: int, req: mod.UserDelete, header_param: Request, db: S
 async def update_user_is_active(id: int, req: mod.UserActiveSet, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_update = db.query(mod.Users).filter(mod.Users.id == id)\
     .update({
         mod.Users.is_active  : req.is_active
@@ -389,7 +389,7 @@ async def check_user_token(header_param: Request, db: Session):
 async def create_department(header_param: Request, req: mod.DepartmentSchema, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_add = mod.Department(**req.dict())
     if new_add:
         db.add(new_add)
@@ -405,7 +405,7 @@ async def create_department(header_param: Request, req: mod.DepartmentSchema, db
 async def update_department(id, header_param, req: mod.DepartmentSchema, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     req_json = jsonable_encoder(req)
     new_update = db.query(mod.Department).filter(mod.Department.id == id)\
         .update(req_json, synchronize_session=False)
@@ -421,7 +421,7 @@ async def update_department(id, header_param, req: mod.DepartmentSchema, db: Ses
 async def read_admin_departments(header_param, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     result = db.query(mod.Department)\
         .options(joinedload(mod.Department.class_rel)\
             .options(joinedload(mod.Class.subclass)\
@@ -446,7 +446,7 @@ async def read_admin_departments(header_param, db: Session):
 async def create_class(req: mod.ClassSchema, header_param, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_add = mod.Class(
         name_lt     = req.name_lt,
         name_ru     = req.name_ru,
@@ -465,7 +465,7 @@ async def create_class(req: mod.ClassSchema, header_param, db: Session):
 async def update_class(id, header_param, req: mod.ClassSchema, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     req_json = jsonable_encoder(req)
     new_update = db.query(mod.Class).filter(mod.Class.id == id)\
         .update(req_json, synchronize_session=False)
@@ -480,7 +480,7 @@ async def update_class(id, header_param, req: mod.ClassSchema, db: Session):
 async def read_admin_classes(header_param: Request, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     result = db.query(mod.Class)\
         .options(joinedload(mod.Class.subclass)\
             .options(joinedload(mod.Subclass.supersubclass)\
@@ -506,7 +506,7 @@ async def read_admin_classes(header_param: Request, db: Session):
 async def create_subclass(header_param, req: mod.SubclassSchema, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_add = mod.Subclass(**req.dict())
     if new_add:
         db.add(new_add)
@@ -521,7 +521,7 @@ async def create_subclass(header_param, req: mod.SubclassSchema, db: Session):
 async def update_subclass(id, header_param, req: mod.SubclassSchema, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     req_json = jsonable_encoder(req)
     new_update = db.query(mod.Subclass).filter(mod.Subclass.id == id)\
         .update(req_json, synchronize_session=False)
@@ -536,7 +536,7 @@ async def update_subclass(id, header_param, req: mod.SubclassSchema, db: Session
 async def read_admin_subclass(header_param, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     result = db.query(mod.Subclass)\
         .options(joinedload(mod.Subclass.supersubclass)\
             .options(joinedload(mod.Supersubclass.order)\
@@ -561,7 +561,7 @@ async def read_admin_subclass(header_param, db: Session):
 async def create_supersubclass(header_param: Request, req: mod.SupersubclassSchema, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_add = mod.Supersubclass(**req.dict())
     if new_add:
         db.add(new_add)
@@ -576,7 +576,7 @@ async def create_supersubclass(header_param: Request, req: mod.SupersubclassSche
 async def update_supersubclass(id, header_param: Request, req: mod.SupersubclassSchema, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     req_json = jsonable_encoder(req)
     new_update = db.query(mod.Supersubclass).filter(mod.Supersubclass.id == id)\
         .update(req_json, synchronize_session=False)
@@ -591,7 +591,7 @@ async def update_supersubclass(id, header_param: Request, req: mod.Supersubclass
 async def read_admin_supersubclass(header_param: Request, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     result = db.query(mod.Supersubclass)\
         .options(joinedload(mod.Supersubclass.order)\
             .options(joinedload(mod.Order.suborder)))\
@@ -612,7 +612,7 @@ async def read_admin_supersubclass(header_param: Request, db: Session):
 async def create_order(header_param: Request, req: mod.OrderSchema, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_add = mod.Order(**req.dict())
     if new_add:
         db.add(new_add)
@@ -627,7 +627,7 @@ async def create_order(header_param: Request, req: mod.OrderSchema, db: Session)
 async def update_order(id: int, header_param: Request, req: mod.OrderSchema, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     req_json = jsonable_encoder(req)
     new_update = db.query(mod.Order).filter(mod.Order.id == id)\
         .update(req_json, synchronize_session=False)
@@ -642,7 +642,7 @@ async def update_order(id: int, header_param: Request, req: mod.OrderSchema, db:
 async def read_admin_order(header_param: Request, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     result = db.query(mod.Order)\
         .options(joinedload(mod.Order.suborder))\
             .filter(mod.Order.is_deleted == False)\
@@ -663,7 +663,7 @@ async def read_admin_order(header_param: Request, db: Session):
 async def create_suborder(header_param, req, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     new_add = mod.Suborder(**req.dict())
     if new_add:
         db.add(new_add)
@@ -678,7 +678,7 @@ async def create_suborder(header_param, req, db: Session):
 async def update_suborder(id, header_param, req, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     req_json = jsonable_encoder(req)
     new_update = db.query(mod.Suborder).filter(mod.Suborder.id == id)\
         .update(req_json, synchronize_session=False)
@@ -692,7 +692,7 @@ async def update_suborder(id, header_param, req, db: Session):
 async def read_admin_suborder(header_param, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
-        return None
+        return -1
     result = db.query(mod.Suborder).filter(mod.Suborder.is_deleted == False)\
         .order_by(desc(mod.Suborder.id)).all()
     if result:
