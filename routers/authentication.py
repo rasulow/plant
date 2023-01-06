@@ -9,7 +9,7 @@ import models as mod
 from returns import Returns
 
 
-authentication_router = APIRouter()
+authentication_router = APIRouter(tags=['Authentication'])
 
 
 
@@ -57,8 +57,6 @@ async def get_users(header_param: Request, db: Session = Depends(get_db)):
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
-    else:
-        return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @authentication_router.get('/api/get-user/{id}', dependencies=[Depends(HTTPBearer())])
@@ -69,8 +67,6 @@ async def get_user(id: int, header_param: Request, db: Session = Depends(get_db)
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
-    else:
-        return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @authentication_router.get('/api/get-admins', dependencies=[Depends(HTTPBearer())])
@@ -116,7 +112,7 @@ async def update_admin(id: int, header_param: Request, req: mod.AdminBase, db: S
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(status_code=status.HTTP_200_OK)
+        return JSONResponse(content=Returns.UPDATED, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -136,11 +132,13 @@ async def delete_admin(id: int, header_param: Request, req: mod.UserDelete, db: 
 @authentication_router.put('/api/update-admin-is-active/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_is_active(id: int, header_param: Request, req: mod.UserActiveSet, db: Session = Depends(get_db)):
     result = await crud.update_admin_is_active(id=id, header_param=header_param, req=req, db=db)
-    result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(status_code=status.HTTP_200_OK)
+        if req.is_active:
+            return JSONResponse(content=Returns.ACTIVATED, status_code=status.HTTP_200_OK)
+        else:
+            return JSONResponse(content=Returns.DISACTIVATED, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -161,7 +159,11 @@ async def create_user(header_param: Request, req: mod.UserBase, db: Session = De
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
-    if result:
+    if result == -2:
+        result = {'msg': 'This user already exists!'}
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
+    elif result:
+        result['msg'] = 'Created!'
         return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
@@ -171,14 +173,15 @@ async def create_user(header_param: Request, req: mod.UserBase, db: Session = De
 @authentication_router.put('/api/update-user/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_user(id: int, header_param: Request, req: mod.UserBase, db: Session = Depends(get_db)):
     result = await crud.update_user(id=id, header_param=header_param, req=req, db=db)
-    print(result)
-    result = jsonable_encoder(result)
-    print(result)
-    
+    result = jsonable_encoder(result)    
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
-    if result:
-        return JSONResponse(status_code=status.HTTP_200_OK)
+    if result == -2:
+        result = {'msg': 'This user already exists!'}
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
+    elif result:
+        result = {'msg': 'Updated!'}
+        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -191,7 +194,7 @@ async def delete_user(id: int, header_param: Request, req: mod.UserDelete, db: S
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(status_code=status.HTTP_200_OK)
+        return JSONResponse(content=Returns.DELETED, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -199,10 +202,12 @@ async def delete_user(id: int, header_param: Request, req: mod.UserDelete, db: S
 @authentication_router.put('/api/update-user-is-active/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_user_is_active(id: int, header_param: Request, req: mod.UserActiveSet, db: Session = Depends(get_db)):
     result = await crud.update_user_is_active(id=id, header_param=header_param, req=req, db=db)
-    result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(status_code=status.HTTP_200_OK)
+        if req.is_active:
+            return JSONResponse(content=Returns.ACTIVATED, status_code=status.HTTP_200_OK)
+        else:
+            return JSONResponse(content=Returns.DISACTIVATED, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)

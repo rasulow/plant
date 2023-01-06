@@ -3,12 +3,11 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from db import get_db
-from returns import Returns
 import models as mod
 import crud
 
 
-order_router = APIRouter()
+order_router = APIRouter(tags=['Order'])
 
 @order_router.post('/api/create-order')
 async def create_order(header_param: Request, req: mod.OrderSchema, db: Session = Depends(get_db)):

@@ -98,11 +98,8 @@ async def read_all_users(header_param: Request, db: Session):
     )\
         .filter(and_(
             mod.Users.is_deleted == False,
-        )).order_by(asc(mod.Users.id)).distinct().all()
-    if result:
-        return result
-    else:
-        return None
+        )).order_by(desc(mod.Users.id)).distinct().all()
+    return result
 
 
 # read user
@@ -115,11 +112,7 @@ async def read_user(id, header_param: Request, db: Session):
             mod.Users.id == id, 
             mod.Users.is_deleted == False,
         )).first()
-    if result:
-        return result
-    else:
-        return None
-
+    return result
 
 # read all admin
 async def read_all_admins(header_param: Request, db: Session):
@@ -168,7 +161,6 @@ async def create_admin(req: mod.AdminBase, db: Session, header_param):
         password        = req.password,
         token           = access_token,
         is_active       = req.is_active,
-        is_superadmin   = req.is_superadmin
     )
     if new_add:
         db.add(new_add)
@@ -185,12 +177,9 @@ async def update_admin(id, req: mod.AdminBase, header_param: Request, db: Sessio
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return -1
+    req_json = jsonable_encoder(req)
     new_update = db.query(mod.Admin).filter(mod.Admin.id == id)\
-        .update({
-            mod.Admin.username   : req.username,
-            mod.Admin.password   : req.password,
-            mod.Admin.is_active  : req.is_active,
-        }, synchronize_session=False)
+        .update(req_json, synchronize_session=False)
     db.commit()
     if new_update:
         return True
@@ -272,6 +261,12 @@ async def create_user(req: mod.UserBase, header_param: Request, db: Session):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return -1
+    if req.username == "" or req.password == "" or ' ' in req.username or ' ' in req.password:
+        return None
+    user_exist = db.query(mod.Users)\
+        .filter(mod.Users.username == req.username).first()
+    if user_exist:
+        return -2
     new_dict = {
         'username'  : req.username,
         'password'  : req.password
@@ -280,7 +275,6 @@ async def create_user(req: mod.UserBase, header_param: Request, db: Session):
     new_add = mod.Users(
         username    = req.username,
         password    = req.password,
-        is_active   = req.is_active,
         token       = access_token
     )
     if new_add:
@@ -298,12 +292,14 @@ async def update_user(id: int, req: mod.UserBase, header_param: Request, db: Ses
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return -1
+    user_exist = db.query(mod.Users)\
+        .filter(and_(mod.Users.username == req.username)).first()
+    
+    if user_exist and user_exist.id != id:
+        return -2
+    req_json = jsonable_encoder(req)
     new_update = db.query(mod.Users).filter(mod.Users.id == id)\
-        .update({
-            mod.Users.username   : req.username,
-            mod.Users.password   : req.password,
-            mod.Users.is_active  : req.is_active
-        }, synchronize_session=False)
+        .update(req_json, synchronize_session=False)
     db.commit()
     if new_update:
         return True

@@ -12,8 +12,6 @@ class LoginSchema(BaseModel):
 class AdminBase(BaseModel):
     username        : str
     password        : str
-    is_active       : bool = False
-    is_superadmin   : bool = False
 
     class Config:
         orm_mode = True
@@ -22,7 +20,6 @@ class AdminBase(BaseModel):
 class UserBase(BaseModel):
     username        : str
     password        : str
-    is_active       : bool = False
 
     class Config:
         orm_mode = True
@@ -61,24 +58,21 @@ class DepartmentSchema(CategoriesBase):
         orm_mode = True
 
 
-class ClassSchema(CategoriesBase):
+class ClassSchema(DepartmentSchema):
     department_id   : int
     
     class Config:
         orm_mode = True
         
 
-class SubclassSchema(CategoriesBase):
-    department_id   : int
+class SubclassSchema(ClassSchema):
     class_id        : int
     
     class Config:
         orm_mode = True
 
 
-class SupersubclassSchema(CategoriesBase):
-    department_id   : int
-    class_id        : int
+class SupersubclassSchema(SubclassSchema):
     subclass_id     : int
     
     class Config:
@@ -86,22 +80,22 @@ class SupersubclassSchema(CategoriesBase):
 
 
 
-class OrderSchema(CategoriesBase):
-    department_id       : int
-    class_id            : int
-    subclass_id         : int
+class OrderSchema(SupersubclassSchema):
     supersubclass_id    : int
     
     class Config:
         orm_mode = True
 
 
-class SuborderSchema(CategoriesBase):
-    department_id       : int
-    class_id            : int
-    subclass_id         : int
-    supersubclass_id    : int
+class SuborderSchema(OrderSchema):
     order_id            : int
+    
+    class Config:
+        orm_mode = True
+        
+        
+class FamilySchema(SuborderSchema):
+    suborder_id         : int
     
     class Config:
         orm_mode = True

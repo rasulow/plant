@@ -8,7 +8,7 @@ import models as mod
 import crud
 
 
-suborder_router = APIRouter()
+suborder_router = APIRouter(tags=['Suborder'])
 
 
 @suborder_router.post('/api/create-suborder')

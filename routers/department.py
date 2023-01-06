@@ -5,10 +5,9 @@ from sqlalchemy.orm import Session
 from db import get_db
 import crud
 import models as mod
-from returns import Returns
 
 
-department_router = APIRouter()
+department_router = APIRouter(tags=['Department'])
 
 
 @department_router.post('/api/create-department')

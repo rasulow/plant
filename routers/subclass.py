@@ -7,7 +7,7 @@ import crud
 import models as mod
 from returns import Returns
 
-subclass_router = APIRouter()
+subclass_router = APIRouter(tags=['Subclass'])
 
 
 @subclass_router.post('/api/create-subclass')

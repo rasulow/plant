@@ -7,7 +7,7 @@ import crud
 import models as mod
 from returns import Returns
 
-class_router = APIRouter()
+class_router = APIRouter(tags=['Class'])
 
 
 @class_router.post('/api/create-class')

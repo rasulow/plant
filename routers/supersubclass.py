@@ -7,7 +7,7 @@ import crud
 import models as mod
 from returns import Returns
 
-supersubclass_router = APIRouter()
+supersubclass_router = APIRouter(tags=['Supersubclass'])
 
 
 @supersubclass_router.post('/api/create-supersubclass')

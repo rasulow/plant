@@ -11,7 +11,7 @@ class Users(Base):
     username        = Column(String)
     password        = Column(String)
     token           = Column(String)
-    is_active       = Column(Boolean, default=False)
+    is_active       = Column(Boolean, default=True)
     is_deleted      = Column(Boolean, default=False)
     create_at       = Column(DateTime, default=datetime.now)
     update_at       = Column(DateTime, default=datetime.now, onupdate=datetime.now)
@@ -30,7 +30,6 @@ class Admin(Base):
     update_at       = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
 
-# plant
 class Department(Base):
     __tablename__   = 'department'
     id              = Column(Integer, primary_key=True, index=True)
@@ -45,6 +44,8 @@ class Department(Base):
     supersubclass   = relationship('Supersubclass'  , cascade="all, delete", back_populates='department')
     order           = relationship('Order'          , cascade="all, delete", back_populates='department')
     suborder        = relationship('Suborder'       , cascade="all, delete", back_populates='department')
+    family          = relationship('Family'         , cascade="all, delete", back_populates='department')
+    
 
 
 class Class(Base):
@@ -62,6 +63,8 @@ class Class(Base):
     supersubclass   = relationship('Supersubclass'  , cascade="all, delete", back_populates='class_rel')
     order           = relationship('Order'          , cascade="all, delete", back_populates='class_rel')
     suborder        = relationship('Suborder'       , cascade="all, delete", back_populates='class_rel')
+    family          = relationship('Family'         , cascade="all, delete", back_populates='class_rel')
+    
 
 
 
@@ -81,6 +84,8 @@ class Subclass(Base):
     supersubclass   = relationship('Supersubclass'  , cascade="all, delete", back_populates='subclass')
     order           = relationship('Order'          , cascade="all, delete", back_populates='subclass')
     suborder        = relationship('Suborder'       , cascade="all, delete", back_populates='subclass')
+    family          = relationship('Family'         , cascade="all, delete", back_populates='subclass')
+    
 
 
 
@@ -102,6 +107,8 @@ class Supersubclass(Base):
     subclass        = relationship('Subclass'   , back_populates='supersubclass')
     order           = relationship('Order'      , cascade="all, delete", back_populates='supersubclass')
     suborder        = relationship('Suborder'   , cascade="all, delete", back_populates='supersubclass')
+    family          = relationship('Family'     , cascade="all, delete", back_populates='supersubclass')
+    
 
 
 
@@ -123,6 +130,7 @@ class Order(Base):
     subclass        = relationship('Subclass'       , back_populates='order')
     supersubclass   = relationship('Supersubclass'  , back_populates='order')
     suborder        = relationship('Suborder'       , cascade="all, delete", back_populates='order')
+    family          = relationship('Family'         , cascade="all, delete", back_populates='order')
 
 
 class Suborder(Base):
@@ -144,3 +152,29 @@ class Suborder(Base):
     subclass            = relationship('Subclass'       , back_populates='suborder')
     supersubclass       = relationship('Supersubclass'  , back_populates='suborder')
     order               = relationship('Order'          , back_populates='suborder')
+    family              = relationship('Family'         , cascade="all, delete", back_populates='suborder')
+    
+
+
+
+class Family(Base):
+    __tablename__       = 'family'
+    id                  = Column(Integer, primary_key=True, index=True)
+    name_lt             = Column(String)
+    name_ru             = Column(String)
+    department_id       = Column(Integer, ForeignKey('department.id'))
+    class_id            = Column(Integer, ForeignKey('class.id'))
+    subclass_id         = Column(Integer, ForeignKey('subclass.id'))
+    supersubclass_id    = Column(Integer, ForeignKey('supersubclass.id'))
+    order_id            = Column(Integer, ForeignKey('order.id'))
+    suborder_id         = Column(Integer, ForeignKey('suborder.id'))
+    is_deleted          = Column(Boolean, default=False)
+    create_at           = Column(DateTime, default=datetime.now)
+    update_at           = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    department          = relationship('Department'     , back_populates='family')
+    class_rel           = relationship('Class'          , back_populates='family')
+    subclass            = relationship('Subclass'       , back_populates='family')
+    supersubclass       = relationship('Supersubclass'  , back_populates='family')
+    order               = relationship('Order'          , back_populates='family')
+    suborder            = relationship('Suborder'       , back_populates='family')
