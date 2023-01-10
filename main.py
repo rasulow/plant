@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Depends
-from fastapi.security import HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
     department_router,
@@ -14,7 +13,7 @@ from routers import (
 from db import Base, engine
 
 
-app = FastAPI(title='Plant API')
+app = FastAPI(title='Plant Cadastre API')
 
 origins = ["*"]
 methods = ["*"]
@@ -32,9 +31,10 @@ app.add_middleware(
 Base.metadata.create_all(engine)
 
 app.include_router(authentication_router)
-app.include_router(department_router    , dependencies=[Depends(HTTPBearer())])
-app.include_router(class_router         , dependencies=[Depends(HTTPBearer())])
-app.include_router(subclass_router      , dependencies=[Depends(HTTPBearer())])
-app.include_router(supersubclass_router , dependencies=[Depends(HTTPBearer())])
-app.include_router(order_router         , dependencies=[Depends(HTTPBearer())])
-app.include_router(suborder_router      , dependencies=[Depends(HTTPBearer())])
+app.include_router(department_router)
+app.include_router(class_router)
+app.include_router(subclass_router)
+app.include_router(supersubclass_router)
+app.include_router(order_router)
+app.include_router(suborder_router)
+app.include_router(family_router)

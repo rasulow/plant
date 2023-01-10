@@ -151,6 +151,12 @@ async def create_admin(req: mod.AdminBase, db: Session, header_param):
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return -1
+    if req.username == "" or req.password == "" or ' ' in req.username or ' ' in req.password:
+        return None
+    user_exist = db.query(mod.Admin)\
+        .filter(mod.Users.username == req.username).first()
+    if user_exist:
+        return -2
     new_dict = {
         'username'  : req.username,
         'password'  : req.password
@@ -177,6 +183,11 @@ async def update_admin(id, req: mod.AdminBase, header_param: Request, db: Sessio
     user = await check_admin_is_superadmin(header_param=header_param, db=db)
     if not user:
         return -1
+    user_exist = db.query(mod.Admin)\
+        .filter(and_(mod.Admin.username == req.username)).first()
+    
+    if user_exist and user_exist.id != id:
+        return -2
     req_json = jsonable_encoder(req)
     new_update = db.query(mod.Admin).filter(mod.Admin.id == id)\
         .update(req_json, synchronize_session=False)
@@ -695,3 +706,45 @@ async def read_admin_suborder(header_param, db: Session):
         return result
     else:
         return None
+    
+    
+    
+##########
+# FAMILY #
+##########
+
+
+async def create_family(header_param: Request, req: mod.FamilySchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.Family(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+    
+async def update_family(id, header_param: Request, req: mod.FamilySchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Family).filter(mod.Family.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return True 
+    
+    
+    
+async def read_admin_family(header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    result = db.query(mod.Family).filter(mod.Family.is_deleted == False)\
+        .order_by(desc(mod.Family.id)).all()
+    if result:
+        return result

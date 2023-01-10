@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends, Request, status, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from fastapi.security import HTTPBearer
 from db import get_db
 import models as mod
 import crud
 
 
-order_router = APIRouter(tags=['Order'])
+order_router = APIRouter(tags=['Order'], dependencies=[Depends(HTTPBearer())])
 
 @order_router.post('/api/create-order')
 async def create_order(header_param: Request, req: mod.OrderSchema, db: Session = Depends(get_db)):

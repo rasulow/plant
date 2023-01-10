@@ -1,8 +1,8 @@
 class Returns:
-    UPDATED                        = {"status" : "Successfully updated!"}
-    DELETED                        = {"status" : "Successfully deleted!"}
-    ACTIVATED                      = {"status" : "Activated!"}
-    DISACTIVATED                   = {"status" : "Disactivated!"}
+    UPDATED                        = {"status" : "Успешно обновлено!"}
+    DELETED                        = {"status" : "Успешно удалено!"}
+    ACTIVATED                      = {"status" : "Активировано!"}
+    DISACTIVATED                   = {"status" : "Отключено!"}
     
     def object(obj):
         return {"error" : False, "body" : obj}

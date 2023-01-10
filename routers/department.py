@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends, Request, status, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from fastapi.security import HTTPBearer
 from db import get_db
 import crud
 import models as mod
 
 
-department_router = APIRouter(tags=['Department'])
+department_router = APIRouter(tags=['Department'], dependencies=[Depends(HTTPBearer())])
 
 
 @department_router.post('/api/create-department')
@@ -42,6 +43,6 @@ async def get_admin_departments(header_param: Request, db: Session = Depends(get
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)

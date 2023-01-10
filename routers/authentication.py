@@ -99,8 +99,12 @@ async def create_admin(header_param: Request, req: mod.AdminBase, db: Session = 
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
-    if result:
+    if result == -2:
+        result = {'msg': 'Этот пользователь уже существует!'}
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
+    elif result:
+        result['msg'] = 'Создано!'
+        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -111,8 +115,12 @@ async def update_admin(id: int, header_param: Request, req: mod.AdminBase, db: S
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
-    if result:
-        return JSONResponse(content=Returns.UPDATED, status_code=status.HTTP_200_OK)
+    if result == -2:
+        result = {'msg': 'Этот пользователь уже существует!'}
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
+    elif result:
+        result = {'msg': 'Обновлено!'}
+        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -124,7 +132,7 @@ async def delete_admin(id: int, header_param: Request, req: mod.UserDelete, db: 
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(status_code=status.HTTP_200_OK)
+        return JSONResponse(content=Returns.DELETED, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -160,10 +168,10 @@ async def create_user(header_param: Request, req: mod.UserBase, db: Session = De
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result == -2:
-        result = {'msg': 'This user already exists!'}
+        result = {'msg': 'Этот пользователь уже существует!'}
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     elif result:
-        result['msg'] = 'Created!'
+        result['msg'] = 'Создано!'
         return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
@@ -177,10 +185,10 @@ async def update_user(id: int, header_param: Request, req: mod.UserBase, db: Ses
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result == -2:
-        result = {'msg': 'This user already exists!'}
+        result = {'msg': 'Этот пользователь уже существует!'}
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     elif result:
-        result = {'msg': 'Updated!'}
+        result = {'msg': 'Обновлено!'}
         return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)

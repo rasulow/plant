@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends, Request, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from fastapi.security import HTTPBearer
 from db import get_db
 import crud
 import models as mod
 from returns import Returns
 
-class_router = APIRouter(tags=['Class'])
+class_router = APIRouter(tags=['Class'], dependencies=[Depends(HTTPBearer())])
 
 
 @class_router.post('/api/create-class')
