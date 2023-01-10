@@ -39,10 +39,24 @@ async def update_department(id: int, header_param: Request, req: mod.DepartmentS
 @department_router.get('/api/get-admin-departments')
 async def get_admin_departments(header_param: Request, db: Session = Depends(get_db)):
     result = await crud.read_admin_departments(header_param, db)
-    result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
+        result = jsonable_encoder(result)
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+    
+    
+    
+@department_router.delete('/api/delete-department/{id}')
+async def delete_department(id: int, header_param: Request, db: Session = Depends(get_db)):
+    result = await crud.delete_department(id, header_param, db)
+    if result == -1:
+        return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
+    if result:
+        result = jsonable_encoder(result)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
+    else:
+        return HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail='Не удалено!')
+    

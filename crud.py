@@ -60,15 +60,18 @@ async def check_admin_is_superadmin(header_param: Request, db: Session):
 
 
 # create superadmin
-async def create_superadmin(db: Session):
+async def create_superadmin(req: mod.AdminBase, db: Session):
+    new_delete = db.query(mod.Admin).filter(mod.Admin.is_superadmin == True)\
+        .delete(synchronize_session=False)
+    db.commit()
     new_dict = {
-        'username'  : 'admin',
-        'password'  : 'admin'
+        'username'  : req.username,
+        'password'  : req.password
     }
     access_token = await create_access_token(data=new_dict)
     new_add = mod.Admin(
-        username        = 'admin',
-        password        = 'admin',
+        username        = req.username,
+        password        = req.password,
         token           = access_token,
         is_active       = True,
         is_superadmin   = True
@@ -166,7 +169,6 @@ async def create_admin(req: mod.AdminBase, db: Session, header_param):
         username        = req.username,
         password        = req.password,
         token           = access_token,
-        is_active       = req.is_active,
     )
     if new_add:
         db.add(new_add)
@@ -251,7 +253,7 @@ async def read_user_by_username_password(username: str, password: str, db: Sessi
             mod.Users.is_active == True
         )).first()
     if result:
-        return True
+        return result
     else:
         return False
 
@@ -434,7 +436,8 @@ async def read_admin_departments(header_param, db: Session):
             .options(joinedload(mod.Class.subclass)\
                 .options(joinedload(mod.Subclass.supersubclass)\
                     .options(joinedload(mod.Supersubclass.order)\
-                        .options(joinedload(mod.Order.suborder))))))\
+                        .options(joinedload(mod.Order.suborder)\
+                            .options(joinedload(mod.Suborder.family)))))))\
                             .filter(mod.Department.is_deleted == False)\
                                 .order_by(desc(mod.Department.id)).all()
     if result:
@@ -444,6 +447,18 @@ async def read_admin_departments(header_param, db: Session):
 
 
 
+
+async def delete_department(id, header_param: Request, db: Session):
+    user = await check_admin_token(header_param=header_param, db=db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.Department).filter(mod.Department.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        result = {'msg': 'Удалено!'}
+        return result
+    
 
 #########
 # CLASS #
@@ -492,9 +507,10 @@ async def read_admin_classes(header_param: Request, db: Session):
         .options(joinedload(mod.Class.subclass)\
             .options(joinedload(mod.Subclass.supersubclass)\
                 .options(joinedload(mod.Supersubclass.order)\
-                    .optioins(joinedload(mod.Order.suborder)))))\
-                        .filter(mod.Class.is_deleted == False)\
-                            .order_by(desc(mod.Class.id)).all()
+                    .options(joinedload(mod.Order.suborder)\
+                        .options(joinedload(mod.Suborder.family))))))\
+                            .filter(mod.Class.is_deleted == False)\
+                                .order_by(desc(mod.Class.id)).all()
     if result:
         return result
     else:
@@ -547,9 +563,10 @@ async def read_admin_subclass(header_param, db: Session):
     result = db.query(mod.Subclass)\
         .options(joinedload(mod.Subclass.supersubclass)\
             .options(joinedload(mod.Supersubclass.order)\
-                .options(joinedload(mod.Order.suborder))))\
-                    .filter(mod.Subclass.is_deleted == False)\
-                        .order_by(desc(mod.Subclass.id)).all()
+                .options(joinedload(mod.Order.suborder)\
+                    .options(joinedload(mod.Suborder.family)))))\
+                        .filter(mod.Subclass.is_deleted == False)\
+                            .order_by(desc(mod.Subclass.id)).all()
     if result:
         return result
     else:
@@ -601,9 +618,10 @@ async def read_admin_supersubclass(header_param: Request, db: Session):
         return -1
     result = db.query(mod.Supersubclass)\
         .options(joinedload(mod.Supersubclass.order)\
-            .options(joinedload(mod.Order.suborder)))\
-                .filter(mod.Supersubclass.is_deleted == False)\
-                    .order_by(desc(mod.Supersubclass.id)).all()
+            .options(joinedload(mod.Order.suborder)\
+                .options(joinedload(mod.Suborder.family))))\
+                    .filter(mod.Supersubclass.is_deleted == False)\
+                        .order_by(desc(mod.Supersubclass.id)).all()
     if result:
         return result
     else:
@@ -651,9 +669,10 @@ async def read_admin_order(header_param: Request, db: Session):
     if not user:
         return -1
     result = db.query(mod.Order)\
-        .options(joinedload(mod.Order.suborder))\
-            .filter(mod.Order.is_deleted == False)\
-                .order_by(desc(mod.Order.id)).all()
+        .options(joinedload(mod.Order.suborder)\
+            .options(joinedload(mod.Suborder.family)))\
+                .filter(mod.Order.is_deleted == False)\
+                    .order_by(desc(mod.Order.id)).all()
     if result:
         return result
     else:
@@ -700,8 +719,10 @@ async def read_admin_suborder(header_param, db: Session):
     user = await check_admin_token(header_param=header_param, db=db)
     if not user:
         return -1
-    result = db.query(mod.Suborder).filter(mod.Suborder.is_deleted == False)\
-        .order_by(desc(mod.Suborder.id)).all()
+    result = db.query(mod.Suborder)\
+        .options(joinedload(mod.Suborder.family))\
+            .filter(mod.Suborder.is_deleted == False)\
+                .order_by(desc(mod.Suborder.id)).all()
     if result:
         return result
     else:

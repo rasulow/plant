@@ -25,7 +25,7 @@ async def login_admin(req: mod.LoginSchema, db: Session = Depends(get_db)):
     if result:
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
-        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Username or Password wrong')
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Логин или пароль неверный!')
 
 
 @authentication_router.post('/api/login-user')
@@ -35,12 +35,12 @@ async def login_user(req: mod.LoginSchema, db: Session = Depends(get_db)):
     if result:
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
-        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Username or Password wrong')
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Логин или пароль неверный!')
 
 
 @authentication_router.post('/api/create-superadmin')
-async def create_superadmin(db: Session = Depends(get_db)):
-    result = await crud.create_superadmin(db=db)
+async def create_superadmin(req: mod.AdminBase, db: Session = Depends(get_db)):
+    result = await crud.create_superadmin(req=req, db=db)
     result = jsonable_encoder(result)
     if result:
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
