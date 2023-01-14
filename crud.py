@@ -2,6 +2,7 @@ from fastapi import Request, Response
 from sqlalchemy.orm import Session, joinedload
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, or_, desc, asc, func
+from returns import Returns
 from tokens import create_access_token, check_token, decode_token
 import models as mod
 
@@ -437,9 +438,10 @@ async def read_admin_departments(header_param, db: Session):
                 .options(joinedload(mod.Subclass.supersubclass)\
                     .options(joinedload(mod.Supersubclass.order)\
                         .options(joinedload(mod.Order.suborder)\
-                            .options(joinedload(mod.Suborder.family)))))))\
-                            .filter(mod.Department.is_deleted == False)\
-                                .order_by(desc(mod.Department.id)).all()
+                            .options(joinedload(mod.Suborder.family)\
+                                .options(joinedload(mod.Family.genus))))))))\
+                                    .filter(mod.Department.is_deleted == False)\
+                                        .order_by(desc(mod.Department.id)).all()
     if result:
         return result
     else:
@@ -765,7 +767,306 @@ async def read_admin_family(header_param: Request, db: Session):
     user = await check_admin_token(header_param, db)
     if not user:
         return -1
-    result = db.query(mod.Family).filter(mod.Family.is_deleted == False)\
-        .order_by(desc(mod.Family.id)).all()
+    result = db.query(mod.Family)\
+        .options(joinedload(mod.Family.family_synonym))\
+            .filter(mod.Family.is_deleted == False)\
+                .order_by(desc(mod.Family.id)).all()
     if result:
         return result
+    
+    
+    
+async def delete_family(id, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.Family).filter(mod.Family.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        result = {'msg': 'Удалено!'}
+        return result
+
+    
+async def create_family_synonym(header_param: Request, req: mod.FamilySynonymSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.FamilySynonym(**req.dict())
+    if new_add:
+       db.add(new_add)
+       db.commit()
+       db.refresh(new_add)
+       return new_add
+
+
+async def delete_family_synonym(id: int, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.FamilySynonym).filter(mod.FamilySynonym.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        result = {'msg': 'Удалено!'}
+        return result
+    
+    
+    
+#########
+# GENUS #
+#########
+
+
+async def create_genus(header_param: Request, req: mod.GenusSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.Genus(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+async def update_genus(id: int, header_param: Request, req: mod.GenusSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Genus).filter(mod.Genus.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        result = {'msg': 'Обновлено!'}
+        return result
+    
+    
+async def read_admin_genus(header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    result = db.query(mod.Genus)\
+        .options(joinedload(mod.Genus.genus_synonym))\
+            .filter(mod.Genus.is_deleted == False).all()
+    if result:
+        return result
+    
+    
+async def delete_genus(id: int, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.Genus).filter(mod.Genus.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        result = {'msg': 'Удалено!'}
+        return result
+    
+    
+    
+    
+async def create_genus_synonym(header_param: Request, req: mod.GenusSynonymSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.GenusSynonym(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+async def delete_genus_synonym(id: int, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.GenusSynonym).filter(mod.GenusSynonym.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        result = {'msg': 'Удалено!'}
+        return result
+    
+    
+    
+#########
+# PLANT #
+#########
+
+
+async def create_plant(header_param: Request, req: mod.PlantSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.Plant(
+        kind                = req.kind,
+        subkind             = req.subkind,
+        variety             = req.variety,
+        form                = req.form,
+        hybrid              = req.hybrid,
+        cultivar            = req.cultivar,
+        name_ru             = req.name_ru,
+        name_kz             = req.name_kz,
+        name_folk           = req.name_folk,
+        fullname            = req.fullname,
+        fullname_ru         = req.fullname_ru,
+        department_id       = req.department_id,
+        class_id            = req.class_id,
+        subclass_id         = req.subclass_id,
+        supersubclass_id    = req.supersubclass_id,
+        order_id            = req.order_id,
+        suborder_id         = req.suborder_id,
+        family_id           = req.family_id,
+        genus_id            = req.genus_id
+    )
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        
+    objects = []
+
+    for obj in req.fullname_synonym:
+        obj = jsonable_encoder(obj)
+        obj['plant_id'] = new_add.id
+        db_item = mod.FullnameSynonym(name = obj['name'], plant_id = obj['plant_id'])
+        objects.append(db_item)
+    
+
+    for obj in req.plant_author:
+        obj = jsonable_encoder(obj)
+        obj['plant_id'] = new_add.id
+        db_item = mod.PlantAuthor(name = obj['name'], plant_id = obj['plant_id'])
+        objects.append(db_item)
+    
+
+    for obj in req.link_synonym:
+        obj = jsonable_encoder(obj)
+        obj['plant_id'] = new_add.id
+        db_item = mod.LinkSynonym(link = obj['link'], plant_id = obj['plant_id'])
+        objects.append(db_item)
+
+    db.bulk_save_objects(objects)
+    db.commit()
+    
+    if objects:
+        return {'msg': 'Создано!'}  
+    
+    
+async def update_plant(id, header_param: Request, req: mod.PlantSchemaUpdate, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Plant).filter(mod.Plant.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        result = {'msg': 'Обновлено!'}
+        return result
+    
+    
+async def read_admin_plant(header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    result = db.query(mod.Plant)\
+        .options(joinedload(mod.Plant.fullname_synonym))\
+            .options(joinedload(mod.Plant.plant_author))\
+                .options(joinedload(mod.Plant.link_synonym))\
+                    .filter(mod.Plant.is_deleted == False).order_by(desc(mod.Plant.id)).all()
+    if result:
+        return result
+    
+    
+async def delete_plant(id, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.Plant).filter(mod.Plant.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        result = {'msg': 'Удалено!'}
+        return result
+    
+    
+####################
+# PLANT ADDITIONAL #
+####################
+
+
+async def create_fullname_synonym(header_param: Request, req: mod.FullnameSynonymCreateSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.FullnameSynonym(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+    
+    
+async def delete_fullname_synonym(id, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.FullnameSynonym).filter(mod.FullnameSynonym.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        return Returns.delete
+    
+    
+    
+async def create_link_synonym(header_param: Request, req: mod.LinkSynonymCreateSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.LinkSynonym(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+async def delete_link_synonym(id, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.LinkSynonym).filter(mod.LinkSynonym.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        return Returns.delete
+    
+    
+async def create_plant_author(header_param: Request, req: mod.PlantAuthorCreateSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.PlantAuthor(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+async def delete_plant_author(id, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.PlantAuthor).filter(mod.PlantAuthor.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        return Returns.delete

@@ -6,3 +6,5 @@ from routers.supersubclass import supersubclass_router
 from routers.order import order_router
 from routers.suborder import suborder_router
 from routers.family import family_router
+from routers.genus import genus_router
+from routers.plant import plant_router

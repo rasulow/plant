@@ -8,7 +8,9 @@ from routers import (
     supersubclass_router,
     order_router,
     suborder_router,
-    family_router
+    family_router,
+    genus_router,
+    plant_router
 )
 from db import Base, engine
 
@@ -38,3 +40,5 @@ app.include_router(supersubclass_router)
 app.include_router(order_router)
 app.include_router(suborder_router)
 app.include_router(family_router)
+app.include_router(genus_router)
+app.include_router(plant_router)
