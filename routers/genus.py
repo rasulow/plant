@@ -32,7 +32,7 @@ async def update_genus(id: int, header_param: Request, req: mod.GenusSchema, db:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -44,7 +44,7 @@ async def get_admin_genus(header_param: Request, db: Session = Depends(get_db)):
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     
@@ -56,7 +56,7 @@ async def delete_genus(id: int, header_param: Request, db: Session = Depends(get
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     
@@ -69,7 +69,7 @@ async def create_genus_synonym(header_param: Request, req: mod.GenusSynonymSchem
     if result:
         result = jsonable_encoder(result)
         result['msg'] = 'Создано!'
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     
@@ -81,6 +81,6 @@ async def delete_genus_synonym(id: int, header_param: Request, db: Session = Dep
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)

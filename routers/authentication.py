@@ -120,7 +120,7 @@ async def update_admin(id: int, header_param: Request, req: mod.AdminBase, db: S
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     elif result:
         result = {'msg': 'Обновлено!'}
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 

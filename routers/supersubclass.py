@@ -30,7 +30,7 @@ async def update_supersubclass(id: int, header_param: Request, req: mod.Supersub
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(status_code=status.HTTP_201_CREATED)
+        return JSONResponse(status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -43,6 +43,6 @@ async def get_admin_supersubclass(header_param: Request, db: Session = Depends(g
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)

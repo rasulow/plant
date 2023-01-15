@@ -329,10 +329,16 @@ class Plant(Base):
     plant_author        = relationship('PlantAuthor'    , back_populates='plant')
     link_synonym        = relationship('LinkSynonym'    , back_populates='plant')
     
-    areal               = relationship('Areals'         , back_populates='plant')
-    morphology          = relationship('Morphology'     , back_populates='plant')
-    ecology             = relationship('Ecology'        , back_populates='plant')
-    note                = relationship('Note'           , back_populates='plant')
+    areal               = relationship('Areals'         , uselist=False, back_populates='plant')
+    morphology          = relationship('Morphology'     , uselist=False, back_populates='plant')
+    ecology             = relationship('Ecology'        , uselist=False, back_populates='plant')
+    note                = relationship('Note'           , uselist=False, back_populates='plant')
+    apply               = relationship('Apply'          , uselist=False, back_populates='plant')
+    addition            = relationship('Addition'       , uselist=False, back_populates='plant')
+    maps                = relationship('Maps'           , uselist=False, back_populates='plant')
+    image               = relationship('Image'          , back_populates='plant')
+    
+    
     
     
     
@@ -424,3 +430,84 @@ class Note(Base):
     
     plant                   = relationship('Plant', back_populates='note')
     
+    
+    
+class Apply(Base):
+    __tablename__           = 'apply'
+    id                      = Column(Integer, primary_key=True, index=True)
+    can_be_used1            = Column(String)
+    can_be_used2            = Column(String)
+    can_be_used3            = Column(String)
+    as_decorative1          = Column(String)
+    as_decorative2          = Column(String)
+    while_creating          = Column(String)
+    for_phytomelioration1   = Column(String)
+    for_phytomelioration2   = Column(String)
+    for_phytomelioration3   = Column(String)
+    as_food                 = Column(String)
+    as_feed                 = Column(String)
+    as_medicinal            = Column(String)
+    as_technical            = Column(String)
+    for_other_purposes      = Column(String)
+    availability_materials  = Column(String)
+    propagated_seeds        = Column(String)
+    propagated_vegetatively = Column(String)
+    propagated_condition    = Column(String)
+    main_ways_prop          = Column(String)
+    plant_id                = Column(Integer, ForeignKey('plant.id', ondelete='CASCADE'))
+    is_deleted              = Column(Boolean, default=False)
+    create_at               = Column(DateTime, default=datetime.now)
+    update_at               = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    plant                   = relationship('Plant', back_populates='apply')
+    
+    
+    
+class Addition(Base):
+    __tablename__       = 'addition'
+    id                  = Column(Integer, primary_key=True, index=True)
+    red_book1           = Column(String)
+    red_book2           = Column(String)
+    red_book3           = Column(String)
+    source1             = Column(String)
+    source2             = Column(String)
+    source3             = Column(String)
+    source4             = Column(String)
+    source5             = Column(String)
+    note                = Column(String)
+    botanical_institute = Column(String)
+    performer_position  = Column(String)
+    performer_degree    = Column(String)
+    performer_fullname  = Column(String)
+    plant_id            = Column(Integer, ForeignKey('plant.id', ondelete='CASCADE'))
+    is_deleted          = Column(Boolean, default=False)
+    create_at           = Column(DateTime, default=datetime.now)
+    update_at           = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    plant               = relationship('Plant', back_populates='addition')
+    
+    
+class Maps(Base):
+    __tablename__       = 'maps'
+    id                  = Column(Integer, primary_key=True, index=True)
+    img_name            = Column(String)
+    plant_id            = Column(Integer, ForeignKey('plant.id', ondelete='CASCADE'))
+    is_deleted          = Column(Boolean, default=False)
+    create_at           = Column(DateTime, default=datetime.now)
+    update_at           = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    plant               = relationship('Plant', back_populates='maps')
+    
+    
+    
+    
+class Image(Base):
+    __tablename__       = 'image'
+    id                  = Column(Integer, primary_key=True, index=True)
+    img_name            = Column(String)
+    plant_id            = Column(Integer, ForeignKey('plant.id', ondelete='CASCADE'))
+    is_deleted          = Column(Boolean, default=False)
+    create_at           = Column(DateTime, default=datetime.now)
+    update_at           = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    plant               = relationship('Plant', back_populates='image')

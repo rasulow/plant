@@ -12,3 +12,7 @@ from routers.areal import areal_router
 from routers.morphology import morphology_router
 from routers.ecology import ecology_router
 from routers.note import note_router
+from routers.apply import apply_router
+from routers.addition import addition_router
+from routers.map import map_router
+from routers.image import image_router

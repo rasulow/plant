@@ -296,3 +296,50 @@ class NoteSchema(BaseModel):
     
     class Config:
         orm_mode = True
+        
+        
+class ApplySchema(BaseModel):
+    can_be_used1            : str
+    can_be_used2            : str
+    can_be_used3            : str
+    as_decorative1          : str
+    as_decorative2          : str
+    while_creating          : str
+    for_phytomelioration1   : str
+    for_phytomelioration2   : str
+    for_phytomelioration3   : str
+    as_food                 : str
+    as_feed                 : str
+    as_medicinal            : str
+    as_technical            : str
+    for_other_purposes      : str
+    availability_materials  : str
+    propagated_seeds        : str
+    propagated_vegetatively : str
+    propagated_condition    : str
+    main_ways_prop          : str
+    plant_id                : int
+    
+    class Config:
+        orm_mode = True
+        
+        
+
+class AdditionSchema(BaseModel):
+    red_book1           : str
+    red_book2           : str
+    red_book3           : str
+    source1             : str
+    source2             : str
+    source3             : str
+    source4             : str
+    source5             : str
+    note                : str
+    botanical_institute : str
+    performer_position  : str
+    performer_degree    : str
+    performer_fullname  : str
+    plant_id            : int
+    
+    class Config:
+        orm_mode = True

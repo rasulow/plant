@@ -33,7 +33,7 @@ async def update_plant(id: int, header_param: Request, req: mod.PlantSchemaUpdat
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     
@@ -45,7 +45,7 @@ async def get_admin_plant(header_param: Request, db: Session = Depends(get_db)):
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     
@@ -57,7 +57,7 @@ async def delete_plant(id: int, header_param: Request, db: Session = Depends(get
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     
@@ -87,7 +87,7 @@ async def delete_fullname_synonym(id: int, header_param: Request, db: Session = 
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     
@@ -114,7 +114,7 @@ async def delete_link_synonym(id: int, header_param: Request, db: Session = Depe
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     
@@ -140,6 +140,6 @@ async def delete_plant_author(id: int, header_param: Request, db: Session = Depe
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)

@@ -32,7 +32,7 @@ async def update_suborder(id: int, header_param: Request, req: mod.SuborderSchem
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(status_code=status.HTTP_201_CREATED)
+        return JSONResponse(status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -44,7 +44,7 @@ async def get_admin_suborder(header_param: Request, db: Session = Depends(get_db
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
         

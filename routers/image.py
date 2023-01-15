@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, status, HTTPException
+from fastapi import APIRouter, Depends, Request, status, HTTPException, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -8,12 +8,12 @@ import crud
 import models as mod
 
 
-note_router = APIRouter(tags=['Note'], dependencies=[Depends(HTTPBearer())])
+image_router = APIRouter(tags=['Image'], dependencies=[Depends(HTTPBearer())])
 
 
-@note_router.post('/api/create-note')
-async def create_note(header_param: Request, req: mod.NoteSchema, db: Session = Depends(get_db)):
-    result = await crud.create_note(header_param, req, db)
+@image_router.post('/api/create-image/{plant_id}')
+async def create_image(plant_id: int, header_param: Request, db: Session = Depends(get_db), file: UploadFile = File(...)):
+    result = await crud.create_image(plant_id, header_param, db, file)
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
@@ -25,9 +25,9 @@ async def create_note(header_param: Request, req: mod.NoteSchema, db: Session = 
     
     
     
-@note_router.put('/api/update-note/{id}')
-async def update_note(id: int, header_param: Request, req: mod.NoteSchema, db: Session = Depends(get_db)):
-    result = await crud.update_note(id, header_param, req, db)
+@image_router.get('/api/get-image/{plant_id}')
+async def get_image(plant_id: int, header_param: Request, db: Session = Depends(get_db)):
+    result = await crud.read_image(plant_id, header_param, db)
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
@@ -38,9 +38,9 @@ async def update_note(id: int, header_param: Request, req: mod.NoteSchema, db: S
     
     
     
-@note_router.delete('/api/delete-note/{id}')
-async def delete_note(id: int, header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.delete_note(id, header_param, db)
+@image_router.delete('/api/delete-image/{id}')
+async def delete_image(id: int, header_param: Request, db: Session = Depends(get_db)):
+    result = await crud.delete_image(id, header_param, db)
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:

@@ -29,7 +29,7 @@ async def update_order(id: int, header_param: Request, req: mod.OrderSchema, db:
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(status_code=status.HTTP_201_CREATED)
+        return JSONResponse(status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -41,6 +41,6 @@ async def create_order(header_param: Request, db: Session = Depends(get_db)):
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)

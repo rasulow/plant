@@ -30,7 +30,7 @@ async def get_areal(id: int, header_param: Request, db: Session = Depends(get_db
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -42,7 +42,7 @@ async def update_areal(id: int, header_param: Request, req: mod.ArealSchema, db:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -54,7 +54,7 @@ async def delete_areal(id: int, header_param: Request, db: Session = Depends(get
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
         result = jsonable_encoder(result)
-        return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from routers import (
     department_router,
     authentication_router,
@@ -14,7 +15,11 @@ from routers import (
     areal_router,
     morphology_router,
     ecology_router,
-    note_router
+    note_router,
+    apply_router,
+    addition_router,
+    map_router,
+    image_router
 )
 from db import Base, engine
 
@@ -34,6 +39,10 @@ app.add_middleware(
     allow_headers=headers,
 )
 
+
+app.mount('/uploads', StaticFiles(directory="uploads"), name="uploads")
+
+
 Base.metadata.create_all(engine)
 
 app.include_router(authentication_router)
@@ -50,3 +59,7 @@ app.include_router(areal_router)
 app.include_router(morphology_router)
 app.include_router(ecology_router)
 app.include_router(note_router)
+app.include_router(apply_router)
+app.include_router(addition_router)
+app.include_router(map_router)
+app.include_router(image_router)

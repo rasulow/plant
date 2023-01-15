@@ -45,3 +45,4 @@ zope.interface==5.4.0
 python-socketio
 pusher
 gevent
+python-multipart

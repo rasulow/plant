@@ -5,6 +5,7 @@ from sqlalchemy import and_, or_, desc, asc, func
 from returns import Returns
 from tokens import create_access_token, check_token, decode_token
 import models as mod
+import upload_depends
 
 
 
@@ -979,11 +980,14 @@ async def read_admin_plant(header_param: Request, db: Session):
             .options(joinedload(mod.Plant.plant_author))\
                 .options(joinedload(mod.Plant.link_synonym))\
                     .options(joinedload(mod.Plant.areal))\
-                        .options(joinedload(mod.Plant.morphology))\
-                            .options(joinedload(mod.Plant.ecology))\
-                                .options(joinedload(mod.Plant.note))\
-                                    .filter(mod.Plant.is_deleted == False)\
-                                        .order_by(desc(mod.Plant.id)).all()
+                        .options(joinedload(mod.Plant.maps))\
+                            .options(joinedload(mod.Plant.morphology))\
+                                .options(joinedload(mod.Plant.ecology))\
+                                    .options(joinedload(mod.Plant.apply))\
+                                        .options(joinedload(mod.Plant.addition))\
+                                            .options(joinedload(mod.Plant.note))\
+                                                .filter(mod.Plant.is_deleted == False)\
+                                                    .order_by(desc(mod.Plant.id)).all()
     if result:
         return result
     
@@ -1267,3 +1271,147 @@ async def delete_note(id, header_param: Request, db: Session):
     db.commit()
     if new_delete:
         return Returns.delete
+    
+    
+    
+#########
+# APPLY #
+#########
+
+
+async def create_apply(header_param: Request, req: mod.ApplySchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.Apply(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+    
+async def update_apply(id: int, header_param: Request, req: mod.ApplySchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Apply).filter(mod.Apply.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return Returns.update
+    
+    
+    
+############
+# ADDITION #
+############
+
+
+async def create_addition(header_param: Request, req: mod.AdditionSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.Addition(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+    
+async def update_addition(id: int, header_param: Request, req: mod.AdditionSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Addition).filter(mod.Addition.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return Returns.update
+    
+    
+    
+#######
+# MAP #
+#######
+
+
+async def create_map(plant_id: int, header_param: Request, db: Session, file):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    get_img = db.query(mod.Maps).filter(and_(
+        mod.Maps.plant_id == plant_id,
+        mod.Maps.is_deleted == False
+    )).first()
+    if get_img:
+        if get_img.img_name is not None:
+            upload_depends.delete_uploaded_image(image_name=get_img.img_name)
+        db.query(mod.Maps).filter(mod.Maps.plant_id == plant_id)\
+            .delete(synchronize_session=False)
+        db.commit()
+    uploaded_img = upload_depends.upload_image(directory='maps', file=file)
+    new_add = mod.Maps(
+        img_name = uploaded_img,
+        plant_id = plant_id
+    )
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+
+#########
+# IMAGE #
+#########
+
+
+
+async def create_image(plant_id, header_param, db: Session, file):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    uploaded_img = upload_depends.upload_image(directory='maps', file=file)
+    new_add = mod.Image(
+        img_name = uploaded_img,
+        plant_id = plant_id
+    )
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+    
+    
+async def read_image(plant_id, header_param, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    result = db.query(mod.Image).filter(mod.Image.plant_id == plant_id).all()
+    if result:
+        return result
+
+    
+    
+async def delete_image(id, header_param, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    get_img = db.query(mod.Image).filter(mod.Image.id == id).first()
+    if get_img.img_name is not None:
+        upload_depends.delete_uploaded_image(image_name=get_img.img_name)
+    new_delete = db.query(mod.Image).filter(mod.Image.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        return Returns.delete
+    
