@@ -224,3 +224,75 @@ class PlantSchemaUpdate(BaseModel):
     
     class Config:
         orm_mode = True
+        
+        
+class ArealSchema(BaseModel):
+    floristic_regions       : str
+    abbreviated_names       : str
+    old_names               : str
+    study_territory         : str
+    administrative_regions  : str
+    geographic_regions      : str
+    additional_areals       : str
+    general_distribution    : str
+    geo_groups_areals       : str
+    plant_id                : int
+    
+    class Config:
+        orm_mode = True
+        
+        
+class MorphologySchema(BaseModel):
+    growth_form                     : str
+    deciduousness                   : str
+    life_form_raunkier              : str
+    fruit_bearing                   : str
+    type_pollination                : str
+    begin_flowering_decade          : str
+    begin_flowering_month           : str
+    end_flowering_decade            : str
+    end_flowering_month             : str
+    fruit_ripening_decade           : str
+    fruit_ripening_month            : str
+    flower_color_shade              : str
+    flower_color_background         : str
+    fruit_color_shade               : str
+    fruit_color_background          : str
+    leaf_color_summer_shade         : str
+    leaf_color_summer_background    : str
+    leaf_color_autumn_shade         : str
+    leaf_color_autumn_background    : str
+    description_structure           : str
+    additional                      : str
+    plant_id                        : int
+    
+    class Config:
+        orm_mode = True
+        
+        
+class EcologySchema(BaseModel):
+    natural_area            : str
+    vegetation_type         : str
+    vegetation_subtype      : str
+    habitats                : str
+    phytoprotective_status  : str
+    endemicity              : str
+    relic                   : str
+    aboriginality           : str
+    water                   : str
+    soil_fertility          : str
+    soil_salinity           : str
+    light                   : str
+    other_features          : str
+    plant_id                : int
+    
+    class Config:
+        orm_mode = True
+        
+        
+class NoteSchema(BaseModel):
+    text                    : str
+    plant_id                : int
+    
+    class Config:
+        orm_mode = True

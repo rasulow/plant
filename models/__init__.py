@@ -1,9 +1,9 @@
 from models.models import (Users, Admin, Class, Department, Subclass, Supersubclass, 
         Order, Suborder, Family, FamilySynonym, Genus, GenusSynonym, Plant,
-        FullnameSynonym, PlantAuthor, LinkSynonym)
+        FullnameSynonym, PlantAuthor, LinkSynonym, Areals, Morphology, Ecology, Note)
 from models.schemas import (AdminBase, UserBase, UserDelete, UserActiveSet, 
         ClassSchema, DepartmentSchema, LoginSchema, DeleteSchema, SubclassSchema, 
         SupersubclassSchema, OrderSchema, SuborderSchema, FamilySchema, FamilySynonymSchema,
         GenusSchema, GenusSynonymSchema, PlantSchema, FullnameSynonymSchema, PlantAuthorSchema,
         LinkSynonymSchema, PlantSchemaUpdate, FullnameSynonymCreateSchema, LinkSynonymCreateSchema,
-        PlantAuthorCreateSchema)
+        PlantAuthorCreateSchema, ArealSchema, MorphologySchema, EcologySchema, NoteSchema)

@@ -10,7 +10,11 @@ from routers import (
     suborder_router,
     family_router,
     genus_router,
-    plant_router
+    plant_router,
+    areal_router,
+    morphology_router,
+    ecology_router,
+    note_router
 )
 from db import Base, engine
 
@@ -42,3 +46,7 @@ app.include_router(suborder_router)
 app.include_router(family_router)
 app.include_router(genus_router)
 app.include_router(plant_router)
+app.include_router(areal_router)
+app.include_router(morphology_router)
+app.include_router(ecology_router)
+app.include_router(note_router)

@@ -8,3 +8,7 @@ from routers.suborder import suborder_router
 from routers.family import family_router
 from routers.genus import genus_router
 from routers.plant import plant_router
+from routers.areal import areal_router
+from routers.morphology import morphology_router
+from routers.ecology import ecology_router
+from routers.note import note_router

@@ -978,7 +978,12 @@ async def read_admin_plant(header_param: Request, db: Session):
         .options(joinedload(mod.Plant.fullname_synonym))\
             .options(joinedload(mod.Plant.plant_author))\
                 .options(joinedload(mod.Plant.link_synonym))\
-                    .filter(mod.Plant.is_deleted == False).order_by(desc(mod.Plant.id)).all()
+                    .options(joinedload(mod.Plant.areal))\
+                        .options(joinedload(mod.Plant.morphology))\
+                            .options(joinedload(mod.Plant.ecology))\
+                                .options(joinedload(mod.Plant.note))\
+                                    .filter(mod.Plant.is_deleted == False)\
+                                        .order_by(desc(mod.Plant.id)).all()
     if result:
         return result
     
@@ -1066,6 +1071,198 @@ async def delete_plant_author(id, header_param: Request, db: Session):
     if not user:
         return -1
     new_delete = db.query(mod.PlantAuthor).filter(mod.PlantAuthor.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        return Returns.delete
+    
+    
+##########
+# AREALS #
+##########
+
+
+async def create_areals(header_param: Request, req: mod.ArealSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.Areals(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+async def read_areal(id, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    result = db.query(mod.Areals).filter(and_(
+        mod.Areals.plant_id == id,
+        mod.Areals.is_deleted == False
+    )).order_by(desc(mod.Areals.id)).all()
+    if result:
+        return result
+    
+    
+    
+async def update_areal(id: int, header_param: Request, req: mod.ArealSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Areals).filter(mod.Areals.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return Returns.update
+    
+    
+async def delete_areal(id: int, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1 
+    new_delete = db.query(mod.Areals).filter(mod.Areals.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        return Returns.delete
+        
+        
+
+##############
+# MORPHOLOGY #
+##############
+
+
+async def create_morphology(header_param: Request, req: mod.MorphologySchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1 
+    new_add = mod.Morphology(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+async def read_morphology(id, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1 
+    result = db.query(mod.Morphology).filter(and_(
+        mod.Morphology.plant_id == id,
+        mod.Morphology.is_deleted == False
+    )).order_by(desc(mod.Morphology.id)).all()
+    if result:
+        return result
+    
+    
+async def update_morphology(id: int, header_param: Request, req: mod.MorphologySchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1 
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Morphology).filter(mod.Morphology.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return Returns.update
+    
+    
+    
+async def delete_morphology(id: int, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.Morphology).filter(mod.Morphology.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        return Returns.delete
+    
+    
+    
+###########
+# ECOLOGY #
+###########
+
+
+async def create_ecology(header_param: Request, req: mod.EcologySchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.Ecology(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+async def update_ecology(id: int, header_param: Request, req: mod.EcologySchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Ecology).filter(mod.Ecology.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return Returns.update
+    
+    
+    
+async def delete_ecology(id: int, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.Ecology).filter(mod.Ecology.id == id)\
+        .delete(synchronize_session=False)
+    db.commit()
+    if new_delete:
+        return Returns.delete
+    
+    
+    
+#########
+# NOTES #
+#########
+
+
+async def create_note(header_param: Request, req: mod.NoteSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_add = mod.Note(**req.dict())
+    if new_add:
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return new_add
+    
+    
+    
+async def update_note(id: int, header_param: Request, req: mod.NoteSchema, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    req_json = jsonable_encoder(req)
+    new_update = db.query(mod.Note).filter(mod.Note.id == id)\
+        .update(req_json, synchronize_session=False)
+    db.commit()
+    if new_update:
+        return Returns.update
+    
+    
+    
+async def delete_note(id, header_param: Request, db: Session):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    new_delete = db.query(mod.Note).filter(mod.Note.id == id)\
         .delete(synchronize_session=False)
     db.commit()
     if new_delete:

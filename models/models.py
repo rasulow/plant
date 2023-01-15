@@ -328,3 +328,99 @@ class Plant(Base):
     fullname_synonym    = relationship('FullnameSynonym', back_populates='plant')
     plant_author        = relationship('PlantAuthor'    , back_populates='plant')
     link_synonym        = relationship('LinkSynonym'    , back_populates='plant')
+    
+    areal               = relationship('Areals'         , back_populates='plant')
+    morphology          = relationship('Morphology'     , back_populates='plant')
+    ecology             = relationship('Ecology'        , back_populates='plant')
+    note                = relationship('Note'           , back_populates='plant')
+    
+    
+    
+class Areals(Base):
+    __tablename__           = 'areals'
+    id                      = Column(Integer, primary_key=True, index=True)
+    floristic_regions       = Column(String)
+    abbreviated_names       = Column(String)
+    old_names               = Column(String)
+    study_territory         = Column(String)
+    administrative_regions  = Column(String)
+    geographic_regions      = Column(String)
+    additional_areals       = Column(String)
+    general_distribution    = Column(String)
+    geo_groups_areals       = Column(String)
+    plant_id                = Column(Integer, ForeignKey('plant.id', ondelete='CASCADE'))
+    is_deleted              = Column(Boolean, default=False)
+    create_at               = Column(DateTime, default=datetime.now)
+    update_at               = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    plant                   = relationship('Plant', back_populates='areal')
+    
+    
+class Morphology(Base):
+    __tablename__                   = 'morphology'
+    id                              = Column(Integer, primary_key=True, index=True)
+    growth_form                     = Column(String)
+    deciduousness                   = Column(String)
+    life_form_raunkier              = Column(String)
+    fruit_bearing                   = Column(String)
+    type_pollination                = Column(String)
+    begin_flowering_decade          = Column(String)
+    begin_flowering_month           = Column(String)
+    end_flowering_decade            = Column(String)
+    end_flowering_month             = Column(String)
+    fruit_ripening_decade           = Column(String)
+    fruit_ripening_month            = Column(String)
+    flower_color_shade              = Column(String)
+    flower_color_background         = Column(String)
+    fruit_color_shade               = Column(String)
+    fruit_color_background          = Column(String)
+    leaf_color_summer_shade         = Column(String)
+    leaf_color_summer_background    = Column(String)
+    leaf_color_autumn_shade         = Column(String)
+    leaf_color_autumn_background    = Column(String)
+    description_structure           = Column(String)
+    additional                      = Column(String)
+    plant_id                        = Column(Integer, ForeignKey('plant.id', ondelete='CASCADE'))
+    is_deleted                      = Column(Boolean, default=False)
+    create_at                       = Column(DateTime, default=datetime.now)
+    update_at                       = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    plant                           = relationship('Plant', back_populates='morphology')
+    
+    
+    
+class Ecology(Base):
+    __tablename__           = 'ecology'
+    id                      = Column(Integer, primary_key=True, index=True)
+    natural_area            = Column(String)
+    vegetation_type         = Column(String)
+    vegetation_subtype      = Column(String)
+    habitats                = Column(String)
+    phytoprotective_status  = Column(String)
+    endemicity              = Column(String)
+    relic                   = Column(String)
+    aboriginality           = Column(String)
+    water                   = Column(String)
+    soil_fertility          = Column(String)
+    soil_salinity           = Column(String)
+    light                   = Column(String)
+    other_features          = Column(String)
+    plant_id                = Column(Integer, ForeignKey('plant.id', ondelete='CASCADE'))
+    is_deleted              = Column(Boolean, default=False)
+    create_at               = Column(DateTime, default=datetime.now)
+    update_at               = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    plant                   = relationship('Plant', back_populates='ecology')
+    
+    
+class Note(Base):
+    __tablename__           = 'note'
+    id                      = Column(Integer, primary_key=True, index=True)
+    text                    = Column(String)
+    plant_id                = Column(Integer, ForeignKey('plant.id', ondelete='CASCADE'))
+    is_deleted              = Column(Boolean, default=False)
+    create_at               = Column(DateTime, default=datetime.now)
+    update_at               = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    plant                   = relationship('Plant', back_populates='note')
+    
