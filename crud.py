@@ -985,9 +985,10 @@ async def read_admin_plant(header_param: Request, db: Session):
                                 .options(joinedload(mod.Plant.ecology))\
                                     .options(joinedload(mod.Plant.apply))\
                                         .options(joinedload(mod.Plant.addition))\
-                                            .options(joinedload(mod.Plant.note))\
-                                                .filter(mod.Plant.is_deleted == False)\
-                                                    .order_by(desc(mod.Plant.id)).all()
+                                            .options(joinedload(mod.Plant.image))\
+                                                .options(joinedload(mod.Plant.note))\
+                                                    .filter(mod.Plant.is_deleted == False)\
+                                                        .order_by(desc(mod.Plant.id)).all()
     if result:
         return result
     
@@ -1378,6 +1379,9 @@ async def create_image(plant_id, header_param, db: Session, file):
     user = await check_admin_token(header_param, db)
     if not user:
         return -1
+    get_count = db.query(mod.Image).filter(mod.Image.plant_id == plant_id).count()
+    if get_count >= 6:
+        return -2
     uploaded_img = upload_depends.upload_image(directory='maps', file=file)
     new_add = mod.Image(
         img_name = uploaded_img,
@@ -1414,4 +1418,68 @@ async def delete_image(id, header_param, db: Session):
     db.commit()
     if new_delete:
         return Returns.delete
+    
+    
+    
+
+##########
+# SEARCH #
+##########
+
+
+
+async def search_admin(
+    header_param: Request,    
+    department_id,   
+    class_id,        
+    subclass_id,     
+    supersubclass_id,
+    order_id,        
+    suborder_id,     
+    family_id,       
+    genus_id,        
+    text,            
+    db: Session             
+):
+    user = await check_admin_token(header_param, db)
+    if not user:
+        return -1
+    
+    obj_id_str = [department_id, class_id, subclass_id, supersubclass_id, order_id, suborder_id,
+              family_id, genus_id]
+
+    obj_mod = [mod.Plant.department_id, mod.Plant.class_id, mod.Plant.subclass_id, 
+               mod.Plant.supersubclass_id, mod.Plant.order_id, mod.Plant.suborder_id,
+                mod.Plant.family_id, mod.Plant.genus_id]
+    
+    obj_id = []
+
+
+    for elem in obj_id_str:
+        split_by_comma = []
+        split_by_equal = []
+        if elem and elem is not '':
+            split_by_comma = elem.split(',')
+            for comma in split_by_comma:
+                split_by_equal.append(int(comma.split('=')[1]))
+        obj_id.append(split_by_equal)
+
+        
+    
+    result = db.query(mod.Plant).options(joinedload(mod.Plant.image))
+    
+    for i in range(len(obj_id)):
+        if obj_id[i] and obj_id[i][0] is not 0:
+            result = result.filter(or_(obj_mod[i] == j for j in obj_id[i]))
+        
+    obj = [mod.Plant.kind, mod.Plant.subkind, mod.Plant.variety, mod.Plant.form, mod.Plant.hybrid,
+           mod.Plant.cultivar, mod.Plant.name_ru, mod.Plant.name_kz, mod.Plant.name_folk,
+           mod.Plant.fullname, mod.Plant.fullname_ru]
+    if text and text is not '':
+        result = result.filter(or_(
+            func.lower(elem).like(f'%{text}%') for elem in obj
+        ))
+    result = result.order_by(desc(mod.Plant.id))
+    if result:
+        return result.all()
     

@@ -16,6 +16,10 @@ async def create_image(plant_id: int, header_param: Request, db: Session = Depen
     result = await crud.create_image(plant_id, header_param, db, file)
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    if result == -2:
+        result = {'msg': 'Вы не можете добавлять больше 6 картинок!!!'}
+        result = jsonable_encoder(result)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     if result:
         result = jsonable_encoder(result)
         result['msg'] = 'Создано!'
@@ -48,3 +52,4 @@ async def delete_image(id: int, header_param: Request, db: Session = Depends(get
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
     else:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+    
