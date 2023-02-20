@@ -18,6 +18,7 @@ async def create_plant(header_param: Request, req: mod.PlantSchema, db: Session 
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
+        print(result.id)
         result = jsonable_encoder(result)
         result['msg'] = 'Создано!'
         return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
@@ -41,8 +42,16 @@ async def update_plant(id: int, header_param: Request, req: mod.PlantSchemaUpdat
 @plant_router.get('/api/get-admin-plant')
 async def get_admin_plant(header_param: Request, db: Session = Depends(get_db)):
     result = await crud.read_admin_plant(header_param, db)
-    if result == -1:
-        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    if result:
+        result = jsonable_encoder(result)
+        return JSONResponse(content=result, status_code=status.HTTP_200_OK)
+    else:
+        return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+    
+    
+@plant_router.get('/api/get-admin-plant-by-id/{id}')
+async def get_admin_plant_by_id(id: int, header_param: Request, db: Session = Depends(get_db)):
+    result = await crud.read_admin_plant_by_id(id, header_param, db)
     if result:
         result = jsonable_encoder(result)
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)

@@ -345,3 +345,15 @@ class AdditionSchema(BaseModel):
         orm_mode = True
         
         
+class HerbariumSchema(BaseModel):
+    date_of_selection   : str
+    region              : str
+    area                : str
+    place_of_selection  : str
+    geo_latitude        : str
+    geo_longitude       : str
+    sea_level           : str
+    plant_id            : int
+
+    class Config:
+        orm_mode = True

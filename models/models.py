@@ -337,6 +337,8 @@ class Plant(Base):
     addition            = relationship('Addition'       , uselist=False, back_populates='plant')
     maps                = relationship('Maps'           , uselist=False, back_populates='plant')
     image               = relationship('Image'          , back_populates='plant')
+    herbarium           = relationship('Herbarium'      , back_populates='plant')
+    
     
     
     
@@ -511,3 +513,23 @@ class Image(Base):
     update_at           = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     
     plant               = relationship('Plant', back_populates='image')
+    
+    
+
+class Herbarium(Base):
+    __tablename__       = 'herbarium'
+    id                  = Column(Integer, primary_key=True, index=True)
+    img_name            = Column(String, default='')
+    date_of_selection   = Column(String)
+    region              = Column(String)
+    area                = Column(String)
+    place_of_selection  = Column(String)
+    geo_latitude        = Column(String)
+    geo_longitude       = Column(String)
+    sea_level           = Column(String)
+    plant_id            = Column(Integer, ForeignKey('plant.id', ondelete='CASCADE'))
+    is_deleted          = Column(Boolean, default=False)
+    create_at           = Column(DateTime, default=datetime.now)
+    update_at           = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    plant               = relationship('Plant', back_populates='herbarium')

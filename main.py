@@ -20,6 +20,7 @@ from routers import (
     addition_router,
     map_router,
     image_router,
+    herbarium_router,
     search_router
 )
 from db import Base, engine
@@ -64,4 +65,5 @@ app.include_router(apply_router)
 app.include_router(addition_router)
 app.include_router(map_router)
 app.include_router(image_router)
+app.include_router(herbarium_router)
 app.include_router(search_router)

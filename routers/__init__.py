@@ -17,3 +17,4 @@ from routers.addition import addition_router
 from routers.map import map_router
 from routers.image import image_router
 from routers.search import search_router
+from routers.herbarium import herbarium_router

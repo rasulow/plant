@@ -13,7 +13,6 @@ map_router = APIRouter(tags=['Map'], dependencies=[Depends(HTTPBearer())])
 
 @map_router.post('/api/create-map/{plant_id}')
 async def create_map(plant_id: int, header_param: Request, db: Session = Depends(get_db), file: UploadFile = File(...)):
-    print(file.filename)
     result = await crud.create_map(plant_id, header_param, db, file)
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
