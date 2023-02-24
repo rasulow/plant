@@ -49,6 +49,7 @@ class DeleteSchema(BaseModel):
 class CategoriesBase(BaseModel):
     name_lt         : str
     name_ru         : str
+    name_tm         : str
 
 
 class DepartmentSchema(CategoriesBase):
