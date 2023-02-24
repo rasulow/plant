@@ -8,10 +8,10 @@ import crud
 import models as mod
 from returns import Returns
 
-supersubclass_router = APIRouter(tags=['Supersubclass'], dependencies=[Depends(HTTPBearer())])
+supersubclass_router = APIRouter(tags=['Supersubclass'])
 
 
-@supersubclass_router.post('/api/create-supersubclass')
+@supersubclass_router.post('/api/create-supersubclass', dependencies=[Depends(HTTPBearer())])
 async def create_supersubclass(header_param: Request, req: mod.SupersubclassSchema, db: Session = Depends(get_db)):
     result = await crud.create_supersubclass(header_param, req, db)
     result = jsonable_encoder(result)
@@ -23,7 +23,7 @@ async def create_supersubclass(header_param: Request, req: mod.SupersubclassSche
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@supersubclass_router.put('/api/update-supersubclass/{id}')
+@supersubclass_router.put('/api/update-supersubclass/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_supersubclass(id: int, header_param: Request, req: mod.SupersubclassSchema, db: Session = Depends(get_db)):
     result = await crud.update_supersubclass(id, header_param, req, db)
     result = jsonable_encoder(result)
@@ -37,8 +37,8 @@ async def update_supersubclass(id: int, header_param: Request, req: mod.Supersub
 
 
 @supersubclass_router.get('/api/get-admin-supersubclass')
-async def get_admin_supersubclass(header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_admin_supersubclass(header_param, db)
+async def get_admin_supersubclass(db: Session = Depends(get_db)):
+    result = await crud.read_admin_supersubclass(db)
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)

@@ -8,10 +8,10 @@ import crud
 import models as mod
 from returns import Returns
 
-class_router = APIRouter(tags=['Class'], dependencies=[Depends(HTTPBearer())])
+class_router = APIRouter(tags=['Class'])
 
 
-@class_router.post('/api/create-class')
+@class_router.post('/api/create-class', dependencies=[Depends(HTTPBearer())])
 async def create_class(req: mod.ClassSchema, header_param: Request, db: Session = Depends(get_db)):
     result = await crud.create_class(req, header_param, db)
     result = jsonable_encoder(result)
@@ -23,7 +23,7 @@ async def create_class(req: mod.ClassSchema, header_param: Request, db: Session 
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@class_router.put('/api/update-class/{id}')
+@class_router.put('/api/update-class/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_class(id: int, header_param: Request, req: mod.ClassSchema, db: Session = Depends(get_db)):
     result = await crud.update_class(id, header_param, req, db)
     result = jsonable_encoder(result)
@@ -37,8 +37,8 @@ async def update_class(id: int, header_param: Request, req: mod.ClassSchema, db:
 
 
 @class_router.get('/api/get-admin-classes')
-async def get_admin_classes(header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_admin_classes(header_param, db)
+async def get_admin_classes(db: Session = Depends(get_db)):
+    result = await crud.read_admin_classes(db)
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)

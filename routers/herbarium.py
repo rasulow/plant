@@ -8,10 +8,10 @@ import crud
 import models as mod
 
 
-herbarium_router = APIRouter(tags=['Herbarium'], dependencies=[Depends(HTTPBearer())])
+herbarium_router = APIRouter(tags=['Herbarium'])
 
 
-@herbarium_router.post('/api/create-herbarium')
+@herbarium_router.post('/api/create-herbarium', dependencies=[Depends(HTTPBearer())])
 async def create_herbarium(header_param: Request, req: mod.HerbariumSchema, db: Session = Depends(get_db)):
     result = await crud.create_herbarium(header_param, req, db)
     if result == -1:
@@ -26,7 +26,7 @@ async def create_herbarium(header_param: Request, req: mod.HerbariumSchema, db: 
     
     
     
-@herbarium_router.put('/api/update-herbarium-image/{id}')
+@herbarium_router.put('/api/update-herbarium-image/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_herbarium_image(id: int, header_param: Request, db: Session = Depends(get_db), file: UploadFile = File(...)):
     result = await crud.update_herbarium_image(id, header_param, db, file)
     if result == -1:
@@ -40,7 +40,7 @@ async def update_herbarium_image(id: int, header_param: Request, db: Session = D
     
     
     
-@herbarium_router.delete('/api/delete-herbarium/{id}')
+@herbarium_router.delete('/api/delete-herbarium/{id}', dependencies=[Depends(HTTPBearer())])
 async def delete_herbarium(id: int, header_param: Request, db: Session = Depends(get_db)):
     result = await crud.delete_herbarium(id, header_param, db)
     if result == -1:
@@ -54,8 +54,8 @@ async def delete_herbarium(id: int, header_param: Request, db: Session = Depends
     
     
 @herbarium_router.get('/api/get-herbarium/{plant_id}')
-async def get_herbarium(plant_id: int, header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_herbarium(plant_id, header_param, db)
+async def get_herbarium(plant_id: int, db: Session = Depends(get_db)):
+    result = await crud.read_herbarium(plant_id, db)
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:

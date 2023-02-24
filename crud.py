@@ -89,10 +89,7 @@ async def create_superadmin(req: mod.AdminBase, db: Session):
 
 
 # read all users
-async def read_all_users(header_param: Request, db: Session):
-    user = await check_admin_is_superadmin(header_param=header_param, db=db)
-    if not user:
-        return -1
+async def read_all_users(db: Session):
     result = (
         db.query(
             mod.Users.id,
@@ -115,10 +112,7 @@ async def read_all_users(header_param: Request, db: Session):
 
 
 # read user
-async def read_user(id, header_param: Request, db: Session):
-    user = await check_admin_is_superadmin(header_param=header_param, db=db)
-    if not user:
-        return -1
+async def read_user(id, db: Session):
     result = (
         db.query(mod.Users)
         .filter(
@@ -133,10 +127,7 @@ async def read_user(id, header_param: Request, db: Session):
 
 
 # read all admin
-async def read_all_admins(header_param: Request, db: Session):
-    user = await check_admin_is_superadmin(header_param=header_param, db=db)
-    if not user:
-        return -1
+async def read_all_admins(db: Session):
     result = (
         db.query(mod.Admin)
         .filter(
@@ -463,10 +454,7 @@ async def update_department(id, header_param, req: mod.DepartmentSchema, db: Ses
         return None
 
 
-async def read_admin_departments(header_param, db: Session):
-    user = await check_admin_token(header_param=header_param, db=db)
-    if not user:
-        return -1
+async def read_admin_departments(db: Session):
     result = (
         db.query(mod.Department)
         .options(
@@ -519,7 +507,10 @@ async def create_class(req: mod.ClassSchema, header_param, db: Session):
     if not user:
         return -1
     new_add = mod.Class(
-        name_lt=req.name_lt, name_ru=req.name_ru, department_id=req.department_id
+        name_lt=req.name_lt,
+        name_ru=req.name_ru,
+        name_tm=req.name_tm,
+        department_id=req.department_id,
     )
     if new_add:
         db.add(new_add)
@@ -547,10 +538,7 @@ async def update_class(id, header_param, req: mod.ClassSchema, db: Session):
         return None
 
 
-async def read_admin_classes(header_param: Request, db: Session):
-    user = await check_admin_token(header_param=header_param, db=db)
-    if not user:
-        return -1
+async def read_admin_classes(db: Session):
     result = (
         db.query(mod.Class)
         .options(
@@ -610,10 +598,7 @@ async def update_subclass(id, header_param, req: mod.SubclassSchema, db: Session
         return None
 
 
-async def read_admin_subclass(header_param, db: Session):
-    user = await check_admin_token(header_param=header_param, db=db)
-    if not user:
-        return -1
+async def read_admin_subclass(db: Session):
     result = (
         db.query(mod.Subclass)
         .options(
@@ -675,10 +660,7 @@ async def update_supersubclass(
         return None
 
 
-async def read_admin_supersubclass(header_param: Request, db: Session):
-    user = await check_admin_token(header_param=header_param, db=db)
-    if not user:
-        return -1
+async def read_admin_supersubclass(db: Session):
     result = (
         db.query(mod.Supersubclass)
         .options(
@@ -734,10 +716,7 @@ async def update_order(
         return None
 
 
-async def read_admin_order(header_param: Request, db: Session):
-    user = await check_admin_token(header_param=header_param, db=db)
-    if not user:
-        return -1
+async def read_admin_order(db: Session):
     result = (
         db.query(mod.Order)
         .options(
@@ -789,10 +768,7 @@ async def update_suborder(id, header_param, req, db: Session):
         return None
 
 
-async def read_admin_suborder(header_param, db: Session):
-    user = await check_admin_token(header_param=header_param, db=db)
-    if not user:
-        return -1
+async def read_admin_suborder(db: Session):
     result = (
         db.query(mod.Suborder)
         .options(joinedload(mod.Suborder.family))
@@ -838,10 +814,7 @@ async def update_family(id, header_param: Request, req: mod.FamilySchema, db: Se
         return True
 
 
-async def read_admin_family(header_param: Request, db: Session):
-    user = await check_admin_token(header_param, db)
-    if not user:
-        return -1
+async def read_admin_family(db: Session):
     result = (
         db.query(mod.Family)
         .options(joinedload(mod.Family.family_synonym))
@@ -932,10 +905,7 @@ async def update_genus(
         return result
 
 
-async def read_admin_genus(header_param: Request, db: Session):
-    user = await check_admin_token(header_param, db)
-    if not user:
-        return -1
+async def read_admin_genus(db: Session):
     result = (
         db.query(mod.Genus)
         .options(joinedload(mod.Genus.genus_synonym))
@@ -1068,7 +1038,7 @@ async def update_plant(
         return result
 
 
-async def read_admin_plant(header_param: Request, db: Session):
+async def read_admin_plant(db: Session):
     result = (
         db.query(mod.Plant)
         .options(joinedload(mod.Plant.fullname_synonym))
@@ -1091,7 +1061,7 @@ async def read_admin_plant(header_param: Request, db: Session):
         return result
 
 
-async def read_admin_plant_by_id(id: int, header_param: Request, db: Session):
+async def read_admin_plant_by_id(id: int, db: Session):
     result = (
         db.query(mod.Plant)
         .options(joinedload(mod.Plant.department))
@@ -1245,10 +1215,7 @@ async def create_areals(header_param: Request, req: mod.ArealSchema, db: Session
         return new_add
 
 
-async def read_areal(id, header_param: Request, db: Session):
-    user = await check_admin_token(header_param, db)
-    if not user:
-        return -1
+async def read_areal(id, db: Session):
     result = (
         db.query(mod.Areals)
         .filter(and_(mod.Areals.plant_id == id, mod.Areals.is_deleted == False))
@@ -1313,10 +1280,7 @@ async def create_morphology(
         return new_add
 
 
-async def read_morphology(id, header_param: Request, db: Session):
-    user = await check_admin_token(header_param, db)
-    if not user:
-        return -1
+async def read_morphology(id, db: Session):
     result = (
         db.query(mod.Morphology)
         .filter(and_(mod.Morphology.plant_id == id, mod.Morphology.is_deleted == False))
@@ -1585,10 +1549,7 @@ async def create_image(plant_id, header_param, db: Session, file):
         return new_add
 
 
-async def read_image(plant_id, header_param, db: Session):
-    user = await check_admin_token(header_param, db)
-    if not user:
-        return -1
+async def read_image(plant_id, db: Session):
     result = db.query(mod.Image).filter(mod.Image.plant_id == plant_id).all()
     if result:
         return result
@@ -1669,10 +1630,7 @@ async def delete_herbarium(id, header_param: Request, db: Session):
         return Returns.delete
 
 
-async def read_herbarium(plant_id, header_param: Request, db: Session):
-    user = await check_admin_token(header_param, db)
-    if not user:
-        return -1
+async def read_herbarium(plant_id, db: Session):
     result = (
         db.query(mod.Herbarium)
         .filter(
@@ -1690,7 +1648,6 @@ async def read_herbarium(plant_id, header_param: Request, db: Session):
 
 
 async def search_admin(
-    header_param: Request,
     department_id,
     class_id,
     subclass_id,

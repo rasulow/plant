@@ -8,11 +8,11 @@ import crud
 import models as mod
 
 
-morphology_router = APIRouter(tags=['Morphology'], dependencies=[Depends(HTTPBearer())])
+morphology_router = APIRouter(tags=['Morphology'])
 
 
 
-@morphology_router.post('/api/create-morphology')
+@morphology_router.post('/api/create-morphology', dependencies=[Depends(HTTPBearer())])
 async def create_morphology(header_param: Request, req: mod.MorphologySchema, db: Session = Depends(get_db)):
     result = await crud.create_morphology(header_param, req, db)
     if result == -1:
@@ -26,8 +26,8 @@ async def create_morphology(header_param: Request, req: mod.MorphologySchema, db
     
     
 @morphology_router.get('/api/get-morphology/{id}')
-async def get_morphology(id: int, header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_morphology(id, header_param, db)
+async def get_morphology(id: int, db: Session = Depends(get_db)):
+    result = await crud.read_morphology(id, db)
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
@@ -38,7 +38,7 @@ async def get_morphology(id: int, header_param: Request, db: Session = Depends(g
     
     
     
-@morphology_router.put('/api/update-morphology/{id}')
+@morphology_router.put('/api/update-morphology/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_morphology(id: int, header_param: Request, req: mod.MorphologySchema, db: Session = Depends(get_db)):
     result = await crud.update_morphology(id, header_param, req, db)
     if result == -1:
@@ -51,7 +51,7 @@ async def update_morphology(id: int, header_param: Request, req: mod.MorphologyS
     
     
     
-@morphology_router.delete('/api/delete-morphology/{id}')
+@morphology_router.delete('/api/delete-morphology/{id}', dependencies=[Depends(HTTPBearer())])
 async def delete_morphology(id: int, header_param: Request, db: Session = Depends(get_db)):
     result = await crud.delete_morphology(id, header_param, db)
     if result == -1:

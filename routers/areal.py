@@ -8,9 +8,9 @@ import crud
 import models as mod
 
 
-areal_router = APIRouter(tags=['Areals'], dependencies=[Depends(HTTPBearer())])
+areal_router = APIRouter(tags=['Areals'])
 
-@areal_router.post('/api/create-areal')
+@areal_router.post('/api/create-areal', dependencies=[Depends(HTTPBearer())])
 async def create_areal(header_param: Request, req: mod.ArealSchema, db: Session = Depends(get_db)):
     result = await crud.create_areals(header_param, req, db)
     if result == -1:
@@ -24,8 +24,8 @@ async def create_areal(header_param: Request, req: mod.ArealSchema, db: Session 
     
     
 @areal_router.get('/api/get-areal/{id}')
-async def get_areal(id: int, header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_areal(id, header_param, db)
+async def get_areal(id: int, db: Session = Depends(get_db)):
+    result = await crud.read_areal(id, db)
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
@@ -35,7 +35,7 @@ async def get_areal(id: int, header_param: Request, db: Session = Depends(get_db
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@areal_router.put('/api/update-areal/{id}')
+@areal_router.put('/api/update-areal/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_areal(id: int, header_param: Request, req: mod.ArealSchema, db: Session = Depends(get_db)):
     result = await crud.update_areal(id, header_param, req, db)
     if result == -1:
@@ -47,7 +47,7 @@ async def update_areal(id: int, header_param: Request, req: mod.ArealSchema, db:
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@areal_router.delete('/api/delete-areal/{id}')
+@areal_router.delete('/api/delete-areal/{id}', dependencies=[Depends(HTTPBearer())])
 async def delete_areal(id: int, header_param: Request, db: Session = Depends(get_db)):
     result = await crud.delete_areal(id, header_param, db)
     if result == -1:

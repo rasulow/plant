@@ -8,11 +8,10 @@ import crud
 import models as mod
 from typing import List, Optional
 
-search_router = APIRouter(tags=['Search'], dependencies=[Depends(HTTPBearer())])
+search_router = APIRouter(tags=['Search'])
 
 @search_router.get('/api/search-admin')
 async def get_search(
-    header_param    : Request,
     department_id   : Optional[str] = Query(None),
     class_id        : Optional[str] = Query(None),
     subclass_id     : Optional[str] = Query(None),
@@ -25,7 +24,6 @@ async def get_search(
     db              : Session = Depends(get_db)
 ):
     result = await crud.search_admin(
-        header_param,
         department_id,   
         class_id,        
         subclass_id,     

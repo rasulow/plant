@@ -8,9 +8,9 @@ import models as mod
 import crud
 
 
-order_router = APIRouter(tags=['Order'], dependencies=[Depends(HTTPBearer())])
+order_router = APIRouter(tags=['Order'])
 
-@order_router.post('/api/create-order')
+@order_router.post('/api/create-order', dependencies=[Depends(HTTPBearer())])
 async def create_order(header_param: Request, req: mod.OrderSchema, db: Session = Depends(get_db)):
     result = await crud.create_order(header_param, req, db)
     result = jsonable_encoder(result)
@@ -22,7 +22,7 @@ async def create_order(header_param: Request, req: mod.OrderSchema, db: Session 
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@order_router.put('/api/update-order/{id}')
+@order_router.put('/api/update-order/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_order(id: int, header_param: Request, req: mod.OrderSchema, db: Session = Depends(get_db)):
     result = await crud.update_order(id, header_param, req, db)
     result = jsonable_encoder(result)
@@ -35,8 +35,8 @@ async def update_order(id: int, header_param: Request, req: mod.OrderSchema, db:
 
 
 @order_router.get('/api/get-admin-order')
-async def create_order(header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_admin_order(header_param, db)
+async def create_order(db: Session = Depends(get_db)):
+    result = await crud.read_admin_order(db)
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)

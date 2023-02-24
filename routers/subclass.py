@@ -8,10 +8,10 @@ import crud
 import models as mod
 from returns import Returns
 
-subclass_router = APIRouter(tags=['Subclass'], dependencies=[Depends(HTTPBearer())])
+subclass_router = APIRouter(tags=['Subclass'])
 
 
-@subclass_router.post('/api/create-subclass')
+@subclass_router.post('/api/create-subclass', dependencies=[Depends(HTTPBearer())])
 async def create_subclass(header_param: Request, req: mod.SubclassSchema, db: Session = Depends(get_db)):
     result = await crud.create_subclass(header_param, req, db)
     result = jsonable_encoder(result)
@@ -23,7 +23,7 @@ async def create_subclass(header_param: Request, req: mod.SubclassSchema, db: Se
         return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@subclass_router.put('/api/update-subclass/{id}')
+@subclass_router.put('/api/update-subclass/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_subclass(id: int, header_param: Request, req: mod.SubclassSchema, db: Session = Depends(get_db)):
     result = await crud.update_subclass(id, header_param, req, db)
     result = jsonable_encoder(result)
@@ -36,8 +36,8 @@ async def update_subclass(id: int, header_param: Request, req: mod.SubclassSchem
 
 
 @subclass_router.get('/api/get-admin-subclass')
-async def get_admin_subclass(header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_admin_subclass(header_param, db)
+async def get_admin_subclass(db: Session = Depends(get_db)):
+    result = await crud.read_admin_subclass(db)
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)

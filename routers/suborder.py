@@ -9,10 +9,10 @@ import models as mod
 import crud
 
 
-suborder_router = APIRouter(tags=['Suborder'], dependencies=[Depends(HTTPBearer())])
+suborder_router = APIRouter(tags=['Suborder'])
 
 
-@suborder_router.post('/api/create-suborder')
+@suborder_router.post('/api/create-suborder', dependencies=[Depends(HTTPBearer())])
 async def create_suborder(header_param: Request, req: mod.SuborderSchema, db: Session = Depends(get_db)):
     result = await crud.create_suborder(header_param, req, db)
     result = jsonable_encoder(result)
@@ -25,7 +25,7 @@ async def create_suborder(header_param: Request, req: mod.SuborderSchema, db: Se
 
 
 
-@suborder_router.put('/api/update-suborder/{id}')
+@suborder_router.put('/api/update-suborder/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_suborder(id: int, header_param: Request, req: mod.SuborderSchema, db: Session = Depends(get_db)):
     result = await crud.update_suborder(id, header_param, req, db)
     result = jsonable_encoder(result)
@@ -38,8 +38,8 @@ async def update_suborder(id: int, header_param: Request, req: mod.SuborderSchem
 
 
 @suborder_router.get('/api/get-admin-suborder')
-async def get_admin_suborder(header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_admin_suborder(header_param, db)
+async def get_admin_suborder(db: Session = Depends(get_db)):
+    result = await crud.read_admin_suborder(db)
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)

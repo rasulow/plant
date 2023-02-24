@@ -8,10 +8,10 @@ import crud
 import models as mod
 
 
-image_router = APIRouter(tags=['Image'], dependencies=[Depends(HTTPBearer())])
+image_router = APIRouter(tags=['Image'])
 
 
-@image_router.post('/api/create-image/{plant_id}')
+@image_router.post('/api/create-image/{plant_id}', dependencies=[Depends(HTTPBearer())])
 async def create_image(plant_id: int, header_param: Request, db: Session = Depends(get_db), file: UploadFile = File(...)):
     result = await crud.create_image(plant_id, header_param, db, file)
     if result == -1:
@@ -30,8 +30,8 @@ async def create_image(plant_id: int, header_param: Request, db: Session = Depen
     
     
 @image_router.get('/api/get-image/{plant_id}')
-async def get_image(plant_id: int, header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_image(plant_id, header_param, db)
+async def get_image(plant_id: int, db: Session = Depends(get_db)):
+    result = await crud.read_image(plant_id, db)
     if result == -1:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if result:
@@ -42,7 +42,7 @@ async def get_image(plant_id: int, header_param: Request, db: Session = Depends(
     
     
     
-@image_router.delete('/api/delete-image/{id}')
+@image_router.delete('/api/delete-image/{id}', dependencies=[Depends(HTTPBearer())])
 async def delete_image(id: int, header_param: Request, db: Session = Depends(get_db)):
     result = await crud.delete_image(id, header_param, db)
     if result == -1:

@@ -8,10 +8,10 @@ import crud
 import models as mod
 
 
-department_router = APIRouter(tags=['Department'], dependencies=[Depends(HTTPBearer())])
+department_router = APIRouter(tags=['Department'])
 
 
-@department_router.post('/api/create-department')
+@department_router.post('/api/create-department', dependencies=[Depends(HTTPBearer())])
 async def create_department(header_param: Request, req: mod.DepartmentSchema, db: Session = Depends(get_db)):
     result = await crud.create_department(header_param, req, db)
     result = jsonable_encoder(result)
@@ -24,7 +24,7 @@ async def create_department(header_param: Request, req: mod.DepartmentSchema, db
 
 
 
-@department_router.put('/api/update-department/{id}')
+@department_router.put('/api/update-department/{id}', dependencies=[Depends(HTTPBearer())])
 async def update_department(id: int, header_param: Request, req: mod.DepartmentSchema, db: Session = Depends(get_db)):
     result = await crud.update_department(id, header_param, req, db)
     result = jsonable_encoder(result)
@@ -37,8 +37,8 @@ async def update_department(id: int, header_param: Request, req: mod.DepartmentS
 
 
 @department_router.get('/api/get-admin-departments')
-async def get_admin_departments(header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_admin_departments(header_param, db)
+async def get_admin_departments(db: Session = Depends(get_db)):
+    result = await crud.read_admin_departments(db)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
     if result:
@@ -49,7 +49,7 @@ async def get_admin_departments(header_param: Request, db: Session = Depends(get
     
     
     
-@department_router.delete('/api/delete-department/{id}')
+@department_router.delete('/api/delete-department/{id}', dependencies=[Depends(HTTPBearer())])
 async def delete_department(id: int, header_param: Request, db: Session = Depends(get_db)):
     result = await crud.delete_department(id, header_param, db)
     if result == -1:

@@ -49,9 +49,9 @@ async def create_superadmin(req: mod.AdminBase, db: Session = Depends(get_db)):
 
 
 
-@authentication_router.get('/api/get-users', dependencies=[Depends(HTTPBearer())])
-async def get_users(header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_all_users(header_param = header_param, db=db)
+@authentication_router.get('/api/get-users')
+async def get_users(db: Session = Depends(get_db)):
+    result = await crud.read_all_users(db=db)
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
@@ -59,9 +59,9 @@ async def get_users(header_param: Request, db: Session = Depends(get_db)):
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
 
 
-@authentication_router.get('/api/get-user/{id}', dependencies=[Depends(HTTPBearer())])
-async def get_user(id: int, header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_user(id=id, header_param=header_param, db=db)
+@authentication_router.get('/api/get-user/{id}')
+async def get_user(id: int, db: Session = Depends(get_db)):
+    result = await crud.read_user(id=id, db=db)
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
@@ -69,9 +69,9 @@ async def get_user(id: int, header_param: Request, db: Session = Depends(get_db)
         return JSONResponse(content=result, status_code=status.HTTP_200_OK)
 
 
-@authentication_router.get('/api/get-admins', dependencies=[Depends(HTTPBearer())])
-async def get_admins(header_param: Request, db: Session = Depends(get_db)):
-    result = await crud.read_all_admins(header_param=header_param, db=db)
+@authentication_router.get('/api/get-admins')
+async def get_admins(db: Session = Depends(get_db)):
+    result = await crud.read_all_admins(db=db)
     result = jsonable_encoder(result)
     if result == -1:
         return HTTPException(status_code = status.HTTP_401_UNAUTHORIZED)
