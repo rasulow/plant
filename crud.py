@@ -1620,7 +1620,7 @@ async def create_herbarium(
     user = await check_admin_token(header_param, db)
     if not user:
         return -1
-    new_add = mod.Herbarium(**req.dict())
+    new_add = mod.Herbarium(**req)
     if new_add:
         db.add(new_add)
         db.commit()
